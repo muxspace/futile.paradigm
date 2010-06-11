@@ -49,6 +49,8 @@ guards <- function(fn, inherits=TRUE)
 # guards are declared.
 UseFunction <- function(fn.name, ...)
 {
+  require(futile.logger)
+  lg <- getLogger('futile.paradigm')
   fn <- get(fn.name)
   gs <- guards(fn, inherits=FALSE)
   if (is.null(gs)) stop("Function must have guards for functional dispatching")
