@@ -70,7 +70,7 @@ Some background on using guards and pattern matching:
 }
 \keyword{ package }
 \seealso{
-\code{\link{UseFunction}}, \code{\link{UseGeneric}}, \code{\link{guard}}
+\code{\link{UseFunction}}, \code{\link{guard}}, \code{\link{AbuseMethod}}
 }
 \examples{
 # Define the parent function that calls the dispatcher

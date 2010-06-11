@@ -4,11 +4,9 @@
 \alias{access}
 \alias{update}
 \alias{delete}
-\title{
-%%  ~~function to do ... ~~
-}
+\title{ API for CRUD-like operations }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Provides a high-level API for abstracting CRUD operations for arbitrary objects.
 }
 \usage{
 create(x, ...)
@@ -17,47 +15,26 @@ access(x, ...)
 update(x, ...)
 delete(x, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ }
-  \item{type}{ }
-  \item{\dots}{ }
+  \item{x}{ An arbitrary object }
+  \item{type}{ A string that represents a type }
+  \item{\dots}{ Additional arguments to pass to dispatched functions }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  TODO
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
+  'create' returns an object of the requested type.
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+  'access' returns an object of the requested type.
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+  'update' has no return value.
 
-## The function is currently defined as
-function (x, ...) 
-UseGeneric("create", x, ...)
+  'delete' has no return value, but the given object is removed from the environment.
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\author{ Brian Lee Yung Rowe }
+
+% \examples{
+% }
+\keyword{ programming }
+\keyword{ methods }

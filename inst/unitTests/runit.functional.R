@@ -1,4 +1,4 @@
-absdiff <- function(...) UseFunction('absdiff', ...)
+absdiff <<- function(...) UseFunction('absdiff', ...)
 
 guard(absdiff.1, c(
   function(a,b) is.numeric(a) && is.numeric(b),

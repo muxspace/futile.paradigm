@@ -1,23 +1,26 @@
-library(futile.logger)
-configLogger(threshold=DEBUG)
-lg <- getLogger()
+#library(futile.logger)
+#configLogger(threshold=DEBUG)
+#lg <- getLogger()
 
 
 # Adds guards to the base function for functional dispatching
-guard <- function(child.fn, value)
+guard <- function(child.fn, condition)
 {
   #lg(DEBUG, sprintf('data = %s', data))
   child <- deparse(substitute(child.fn))
-  lg(DEBUG, sprintf('Original function name: %s', child))
+  #lg(DEBUG, sprintf('Original function name: %s', child))
   parent <- sub('\\.[^.]+$','', child)
-  lg(DEBUG, sprintf('Parent function name: %s', parent))
+  #lg(DEBUG, sprintf('Parent function name: %s', parent))
 
   if (! exists(parent))
-    stop(sprintf("Function %s has no valid parent function", child))
+  {
+    msg <- "Function %s has no valid parent function '%s'"
+    stop(sprintf(msg, child, parent))
+  }
   fn <- get(parent)
   gs <- attr(fn, 'guards')
   if (is.null(gs)) gs <- list()
-  gs[[child]] <- c(gs[[child]], value)
+  gs[[child]] <- c(gs[[child]], condition)
   attr(fn, 'guards') <- gs
   assign(parent, fn, inherits=TRUE)
 

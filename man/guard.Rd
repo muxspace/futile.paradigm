@@ -15,7 +15,7 @@
   a function hierarchy. 
 }
 \usage{
-guard(child.fn, value)
+guard(child.fn, condition)
 guards(fn, inherits = TRUE)
 }
 \arguments{

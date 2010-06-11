@@ -6,9 +6,6 @@ Date: {date}
 Author: Brian Lee Yung Rowe
 Maintainer: Brian Lee Yung Rowe <r@nurometic.com>
 Depends: futile.logger
-Description: Provides dispatching implementations suitable for functional 
-programming paradigms. The framework provides a mechanism for attaching guards
-to functions similar to Erlang, while also providing the safety of assertions
-reminiscent of Eiffel.
+Description: Provides dispatching implementations suitable for functional programming paradigms. The framework provides a mechanism for attaching guards to functions similar to Erlang, while also providing the safety of assertions reminiscent of Eiffel.
 License: LGPL-3
 LazyLoad: yes

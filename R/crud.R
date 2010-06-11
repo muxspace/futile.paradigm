@@ -1,9 +1,9 @@
 # Interface for create functions
 # Example
 #   create(my.class, arg1, arg2)
-create <- function(type.obj, ...)
+create <- function(x, ...)
 {
-  type <- deparse(substitute(type.obj))
+  type <- deparse(substitute(x))
   type <- gsub('"','', type)
   AbuseMethod('create', type, type, ..., EXPLICIT=TRUE)
 }
