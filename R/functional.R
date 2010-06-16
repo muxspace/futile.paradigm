@@ -3,15 +3,10 @@
 #lg <- getLogger()
 paradigm.options <- OptionsManager('paradigm.options')
 
+# Registers function environments, which is necessary for proper handling
+# within packages that depend on futile.paradigm.
 register <- function(fn.name, where)
 {
-  #cat("Argument environment (callFunctionA):", environmentName(where), '\n')
-  #cat("Objects in arg:", ls(where), sep='\n')
-
-  #cat("Current environment (callFunctionA):", environmentName(environment()), '\n')
-  #cat("Parent environment (callFunctionA):", environmentName(parent.env(environment())), '\n')
-  #cat("Search path (callFunctionA):", search(), '\n')
-
   paradigm.options(update=list(fn.name, where))
   invisible()
 }
@@ -19,20 +14,13 @@ register <- function(fn.name, where)
 # Adds guards to the base function for functional dispatching
 guard <- function(child.fn, condition)
 {
-  #lg(DEBUG, sprintf('data = %s', data))
   child <- deparse(substitute(child.fn))
-  #lg(DEBUG, sprintf('Original function name: %s', child))
   parent <- sub('\\.[^.]+$','', child)
-  #lg(DEBUG, sprintf('Parent function name: %s', parent))
-
-    #cat("Current environment (callFunctionA):", environmentName(environment()), '\n')
-    #cat("Parent environment (callFunctionA):", environmentName(parent.env(environment())), '\n')
-    #cat("Search path (callFunctionA):", search(), '\n')
 
   where <- paradigm.options(parent)
   if (is.null(where)) where <- -1
+
   if (! exists(parent, where))
-  #if (! exists(parent))
   {
     msg <- "Function %s has no visible parent function '%s'"
     stop(sprintf(msg, child, parent))
