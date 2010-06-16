@@ -1,7 +1,20 @@
 #library(futile.logger)
 #configLogger(threshold=DEBUG)
 #lg <- getLogger()
+paradigm.options <- OptionsManager('paradigm.options')
 
+register <- function(fn.name, where)
+{
+  #cat("Argument environment (callFunctionA):", environmentName(where), '\n')
+  #cat("Objects in arg:", ls(where), sep='\n')
+
+  #cat("Current environment (callFunctionA):", environmentName(environment()), '\n')
+  #cat("Parent environment (callFunctionA):", environmentName(parent.env(environment())), '\n')
+  #cat("Search path (callFunctionA):", search(), '\n')
+
+  paradigm.options(update=list(fn.name, where))
+  invisible()
+}
 
 # Adds guards to the base function for functional dispatching
 guard <- function(child.fn, condition)
@@ -12,17 +25,24 @@ guard <- function(child.fn, condition)
   parent <- sub('\\.[^.]+$','', child)
   #lg(DEBUG, sprintf('Parent function name: %s', parent))
 
-  if (! exists(parent))
+    #cat("Current environment (callFunctionA):", environmentName(environment()), '\n')
+    #cat("Parent environment (callFunctionA):", environmentName(parent.env(environment())), '\n')
+    #cat("Search path (callFunctionA):", search(), '\n')
+
+  where <- paradigm.options(parent)
+  if (is.null(where)) where <- -1
+  if (! exists(parent, where))
+  #if (! exists(parent))
   {
-    msg <- "Function %s has no valid parent function '%s'"
+    msg <- "Function %s has no visible parent function '%s'"
     stop(sprintf(msg, child, parent))
   }
-  fn <- get(parent)
+  fn <- get(parent, where)
   gs <- attr(fn, 'guards')
   if (is.null(gs)) gs <- list()
   gs[[child]] <- c(gs[[child]], condition)
   attr(fn, 'guards') <- gs
-  assign(parent, fn, inherits=TRUE)
+  assign(parent, fn, where, inherits=TRUE)
 
   invisible()
 }
@@ -49,8 +69,6 @@ guards <- function(fn, inherits=TRUE)
 # guards are declared.
 UseFunction <- function(fn.name, ...)
 {
-  require(futile.logger)
-  lg <- getLogger('futile.paradigm')
   fn <- get(fn.name)
   gs <- guards(fn, inherits=FALSE)
   if (is.null(gs)) stop("Function must have guards for functional dispatching")
@@ -70,7 +88,7 @@ UseFunction <- function(fn.name, ...)
       else 
       {
         msg <- "Skipping invalid guard '%s' for function '%s'"
-        lg(WARN, sprintf(msg, g, f))
+        cat(sprintf(msg, g, f))
       }
       if (! valid) break
     }

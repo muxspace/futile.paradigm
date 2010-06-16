@@ -1,6 +1,7 @@
 \name{futile.paradigm-package}
 \alias{futile.paradigm-package}
 \alias{futile.paradigm}
+\alias{paradigm.options}
 \docType{package}
 \title{
 A framework for working in a functional programming paradigm in R

@@ -1,6 +1,7 @@
 \name{guard}
 \alias{guard}
 \alias{guards}
+\alias{register}
 
 \title{
   Add guards to a function to define the conditions when a child function will
@@ -15,6 +16,7 @@
   a function hierarchy. 
 }
 \usage{
+register(fn.name, where)
 guard(child.fn, condition)
 guards(fn, inherits = TRUE)
 }
@@ -27,6 +29,8 @@ guards(fn, inherits = TRUE)
     parent function will be queried}
   \item{inherits}{If a function is passed that has no guards, whether to search
     for a parent function. Typically this is safe to leave as the default}
+  \item{fn.name}{The name of the function to register}
+  \item{where}{The position or environment to find the function }
 }
 \details{
 Guards are naturally scoped based on the number of arguments in a function.
@@ -42,6 +46,10 @@ Another important consideration is that using the ellipsis argument is not
 supported in futile.paradigm. This is by design as the functional programming
 approach is intentionally making function arguments explicit, such that the
 ellipsis argument should never be needed in a child function definition. 
+
+The 'register' function is used to manually register environments that a 
+function resides. This is necessary for package development where the calling
+environment doesn't seem to be registered properly.
 }
 \value{
 No value is returned for guard. This function is used purely for its 
