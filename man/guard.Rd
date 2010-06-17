@@ -66,6 +66,9 @@ supported in futile.paradigm. This is by design as the functional programming
 approach is intentionally making function arguments explicit, such that the
 ellipsis argument should never be needed in a child function definition. 
 
+The 'isStrict' function is an introspective function that indicates whether
+the given child function has strict guards or not.
+
 The 'register' function is used to manually register environments that a 
 function resides. This is necessary for package development where the calling
 environment doesn't seem to be registered properly.
@@ -74,8 +77,11 @@ environment doesn't seem to be registered properly.
 No value is returned for guard. This function is used purely for its 
 side-effects.
 
-The guards function returns a list of guard functions for each child function
+The 'guards' function returns a list of guard functions for each child function
 defined. This essentially shows the evaluation path that UseFunction will take.
+
+'isStrict' returns a logical value.
+
 }
 \author{ Brian Lee Yung Rowe }
 \note{ In general functions in FP do not have side-effects. This principle does
