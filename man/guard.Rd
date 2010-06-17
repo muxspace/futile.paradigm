@@ -2,6 +2,7 @@
 \alias{guard}
 \alias{guards}
 \alias{register}
+\alias{isStrict}
 
 \title{
   Add guards to a function to define the conditions when a child function will
@@ -17,7 +18,7 @@
 }
 \usage{
 register(fn.name, where)
-guard(child.fn, condition)
+guard(child.fn, condition, strict = TRUE)
 guards(fn, inherits = TRUE)
 }
 \arguments{
@@ -25,6 +26,8 @@ guards(fn, inherits = TRUE)
     not need to exist yet}
   \item{condition}{The conditions for dispatching to this function. This must
     be a function that returns a boolean value or can be a vector of functions }
+  \item{strict}{Whether strict matching of arguments should be used. See Details
+    for more information}
   \item{fn}{The function to find guards for. If this is a child function, the
     parent function will be queried}
   \item{inherits}{If a function is passed that has no guards, whether to search
@@ -36,6 +39,22 @@ guards(fn, inherits = TRUE)
 Guards are naturally scoped based on the number of arguments in a function.
 Hence only functions with the same number of arguments as were passed into the
 parent function will be considered for dispatching.
+
+When using strict guards (the default behavior) named arguments passed into the
+parent function must match the named arguments defined in the child function.
+Hence, dispatching is defined by both the number of arguments and the matching
+named arguments, which introduces a greater level of control in dispatching 
+than otherwise possible. In general, the built-in argument matching with Do
+the Right Thing w.r.t. unnamed arguments, although the first match will be the
+one applied, which could result in unexpected behavior if one is careless.
+
+Note that when strict argumentss are applied, the names of the arguments in the
+guard functions are irrelevant. The strict matching occurs at the level of the
+actual functions and not the guard functions.
+
+When strict guards are disabled, then only argument length will be applied as a
+precondition plus any conditions defined by the guards. In certain circumstances
+this may be desired, although in general strict guards provides greater control.
 
 The order that the function guards are defined determines the order that 
 functions are evaluated for satisfaction of guard criteria. This is a detail

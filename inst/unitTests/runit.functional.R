@@ -19,6 +19,17 @@ guard(absdiff.21,
 )
 absdiff.21 <<- function(a, b) absdiff(as.double(a), as.double(b))
 
+# This converts to integers. This will be called if c and 
+# optionally d is named
+guard(absdiff.int, TRUE)
+absdiff.int <<- function(c, d) absdiff(as.integer(c), as.integer(d))
+
+# THis uses log values. Note that this will only be executed if
+# l is explicitly named (and all preceding 2 argument functions
+# are strict).
+guard(absdiff.log, TRUE)
+absdiff.log <<- function(a, l) absdiff(log(a), log(l))
+
 guard(absdiff.3, function(a) a > 5)
 absdiff.3 <<- function(a) a * 2
 
@@ -47,4 +58,18 @@ test.absdiff.3 <- function()
 test.absdiff.4 <- function()
 {
   checkTrue(12 == absdiff(6))
+}
+
+test.absdiff.int <- function()
+{
+  checkTrue(12 == absdiff(c=3.5, 15.1))
+  checkTrue(12 == absdiff(c=3.5, d=15.1))
+  checkTrue(12 == absdiff(d=3.5, c=15.1))
+  checkException(12 == absdiff(c=3.5, a=15.1))
+}
+
+test.absdiff.log <- function()
+{
+  checkTrue(1.461932 - absdiff(3.5, l=15.1) < 0.000001)
+  checkTrue(1.461932 - absdiff(l=3.5, 15.1) < 0.000001)
 }

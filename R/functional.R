@@ -12,7 +12,7 @@ register <- function(fn.name, where)
 }
 
 # Adds guards to the base function for functional dispatching
-guard <- function(child.fn, condition)
+guard <- function(child.fn, condition, strict=TRUE)
 {
   child <- deparse(substitute(child.fn))
   parent <- sub('\\.[^.]+$','', child)
@@ -30,6 +30,15 @@ guard <- function(child.fn, condition)
   if (is.null(gs)) gs <- list()
   gs[[child]] <- c(gs[[child]], condition)
   attr(fn, 'guards') <- gs
+
+  if (strict)
+  {
+    ss <- attr(fn, 'strict')
+    if (is.null(ss)) ss <- list()
+    ss[[child]] <- strict
+    attr(fn, 'strict') <- ss
+  }
+
   assign(parent, fn, where, inherits=TRUE)
 
   invisible()
@@ -50,6 +59,22 @@ guards <- function(fn, inherits=TRUE)
   guards(get(parent, inherits=TRUE), inherits=TRUE)
 }
 
+# Operates on a child function or functino name
+isStrict <- function(child.fn)
+{
+  if (is.function(child.fn)) child <- deparse(substitute(child.fn))
+  else child <- child.fn
+
+  parent <- sub('\\.[^.]+$','', child)
+  fn <- get(parent, inherits=TRUE)
+
+  ss <- attr(fn, 'strict', exact=TRUE)
+  #cat("Got strict on function:",ss[[child]],"\n")
+  if (! is.null(ss) && ! is.null(ss[[child]])) return(ss[[child]])
+
+  FALSE
+}
+
 
 
 # Dispatcher for a more functional paradigm. This executes a function based on
@@ -67,6 +92,13 @@ UseFunction <- function(fn.name, ...)
     f.exec <- get(f)
     if (is.null(f.exec)) next
     if (length(formals(f.exec)) != length(args)) next
+
+    # If strict, match exactly the function arguments with the arguments
+    # passed in. This is the default behavior.
+    non.empty <- names(args)[nchar(names(args)) > 0]
+    if (length(non.empty) > 0 && isStrict(f) && 
+        length(setdiff(non.empty, names(formals(f)))) > 0 )
+      next
 
     valid <- TRUE
     for (g in gs[[f]])
