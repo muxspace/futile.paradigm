@@ -21,7 +21,10 @@ delete(x, ...)
   \item{\dots}{ Additional arguments to pass to dispatched functions }
 }
 \details{
-  TODO
+  Adding to 'create' requires a minimal function definition as the harness is
+  provided in the package. Typically a list is returned and the function
+  defines any defaults needed. This is similar to the S4 style but is simpler
+  and not a requirement for using the rest of futile.paradigm.
 }
 \value{
   'create' returns an object of the requested type.
@@ -34,7 +37,9 @@ delete(x, ...)
 }
 \author{ Brian Lee Yung Rowe }
 
-% \examples{
-% }
+\examples{
+create.car <- function(x, wheels=4) list(wheels=wheels)
+create(car)
+}
 \keyword{ programming }
 \keyword{ methods }

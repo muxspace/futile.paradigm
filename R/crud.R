@@ -5,7 +5,10 @@ create <- function(x, ...)
 {
   type <- deparse(substitute(x))
   type <- gsub('"','', type)
-  AbuseMethod('create', type, type, ..., EXPLICIT=TRUE)
+  # This is a special construction for create
+  o <- AbuseMethod('create', type, type, ..., EXPLICIT=TRUE)
+  class(o) <- c(type,class(o))
+  o
 }
 
 # Convenience and safe-guard to ensure things don't blow up if not properly 
@@ -14,7 +17,6 @@ create <- function(x, ...)
 create.default <- function(type, ...)
 {
   o <- list(...)
-  class(o) <- c(type, class(o))
   attr(o, 'isDefault') <- TRUE
   o
 }

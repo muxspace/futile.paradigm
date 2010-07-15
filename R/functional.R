@@ -59,7 +59,7 @@ guards <- function(fn, inherits=TRUE)
   guards(get(parent, inherits=TRUE), inherits=TRUE)
 }
 
-# Operates on a child function or functino name
+# Operates on a child function or function name
 isStrict <- function(child.fn)
 {
   if (is.function(child.fn)) child <- deparse(substitute(child.fn))
@@ -75,6 +75,7 @@ isStrict <- function(child.fn)
   FALSE
 }
 
+isa <- function(type, argument) type %in% class(argument)
 
 
 # Dispatcher for a more functional paradigm. This executes a function based on

@@ -3,23 +3,27 @@
 \alias{guards}
 \alias{register}
 \alias{isStrict}
+\alias{isa}
 
 \title{
   Add guards to a function to define the conditions when a child function will
   execute
 }
 \description{
-  The guard function defines the conditions for execution for the given 
+  The 'guard' function defines the conditions for execution for the given 
   function. To use a function within futile.paradigm, a guard must be defined
   for each child function, even if it's a default guard using TRUE.
 
-  The guards function provides introspection and displays guards defined for
+  The 'guards' function provides introspection and displays guards defined for
   a function hierarchy. 
+
+  The 'isa' function performs type checking.
 }
 \usage{
 register(fn.name, where)
 guard(child.fn, condition, strict = TRUE)
 guards(fn, inherits = TRUE)
+isa(type, argument)
 }
 \arguments{
   \item{child.fn}{This is the function for which the guard is applied. It does
@@ -34,6 +38,8 @@ guards(fn, inherits = TRUE)
     for a parent function. Typically this is safe to leave as the default}
   \item{fn.name}{The name of the function to register}
   \item{where}{The position or environment to find the function }
+  \item{type}{A character describing the type to match}
+  \item{argument}{The argument to match type with}
 }
 \details{
 Guards are naturally scoped based on the number of arguments in a function.
@@ -72,6 +78,11 @@ the given child function has strict guards or not.
 The 'register' function is used to manually register environments that a 
 function resides. This is necessary for package development where the calling
 environment doesn't seem to be registered properly.
+
+The 'isa' function is used to perform type checking. Calling the function checks
+whether 'argument' is a 'type'. This is simply syntactic sugar for convenience
+in guard sequences.
+
 }
 \value{
 No value is returned for guard. This function is used purely for its 
@@ -82,7 +93,9 @@ defined. This essentially shows the evaluation path that UseFunction will take.
 
 'isStrict' returns a logical value.
 
+'isa' returns a logical value.
 }
+
 \author{ Brian Lee Yung Rowe }
 \note{ In general functions in FP do not have side-effects. This principle does
   not apply here since this function is used to implement the framework itself.
