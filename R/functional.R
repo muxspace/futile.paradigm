@@ -53,7 +53,10 @@ guard <- function(child.fn, condition, strict=TRUE)
 # Shortcut form for expressions instead of more verbose functions
 .guard.expression <- function(child.fn, expr, strict=TRUE)
 {
-
+  if (class(expr) != "expression") stop("Invalid expression as argument")
+  # Need to add a lazy binding so that the function is bound only when
+  # the actual child.fn is defined. Otherwise, it's impossible to determine
+  # the arguments
 }
 
 # Get the guards for a function. The function can be either the parent or any
