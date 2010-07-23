@@ -44,6 +44,18 @@ guard <- function(child.fn, condition, strict=TRUE)
   invisible()
 }
 
+# Shortcut form for simple pattern matches
+.guard.pattern <- function(fn, expr, result)
+{
+
+}
+
+# Shortcut form for expressions instead of more verbose functions
+.guard.expression <- function(child.fn, expr, strict=TRUE)
+{
+
+}
+
 # Get the guards for a function. The function can be either the parent or any
 # of its attached children
 guards <- function(fn, inherits=TRUE)
