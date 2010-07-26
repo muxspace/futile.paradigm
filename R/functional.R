@@ -17,6 +17,10 @@ guard <- function(child.fn, condition, strict=TRUE)
   child <- deparse(substitute(child.fn))
   parent <- sub('\\.[^.]+$','', child)
 
+  expr <- deparse(substitute(condition))
+  if (length(grep('function', expr)) < 1 && expr != 'TRUE' && expr != 'FALSE') 
+    return(.guard.expression(child, expr, strict))
+
   where <- paradigm.options(parent)
   if (is.null(where)) where <- -1
 
@@ -26,10 +30,10 @@ guard <- function(child.fn, condition, strict=TRUE)
     stop(sprintf(msg, child, parent))
   }
   fn <- get(parent, where)
-  gs <- attr(fn, 'guards')
+  gs <- attr(fn, 'guard.fns')
   if (is.null(gs)) gs <- list()
   gs[[child]] <- c(gs[[child]], condition)
-  attr(fn, 'guards') <- gs
+  attr(fn, 'guard.fns') <- gs
 
   if (strict)
   {
@@ -51,12 +55,41 @@ guard <- function(child.fn, condition, strict=TRUE)
 }
 
 # Shortcut form for expressions instead of more verbose functions
-.guard.expression <- function(child.fn, expr, strict=TRUE)
+# This is the standard way of writing guards, although the long form is slightly
+# more efficient from an execution perspective
+.guard.expression <- function(child, expr, strict)
 {
-  if (class(expr) != "expression") stop("Invalid expression as argument")
   # Need to add a lazy binding so that the function is bound only when
   # the actual child.fn is defined. Otherwise, it's impossible to determine
   # the arguments
+  
+  parent <- sub('\\.[^.]+$','', child)
+
+  where <- paradigm.options(parent)
+  if (is.null(where)) where <- -1
+
+  if (! exists(parent, where))
+  {
+    msg <- "Function %s has no visible parent function '%s'"
+    stop(sprintf(msg, child, parent))
+  }
+  fn <- get(parent, where)
+  gs <- attr(fn, 'guard.xps')
+  if (is.null(gs)) gs <- list()
+  gs[[child]] <- c(gs[[child]], expr)
+  attr(fn, 'guard.xps') <- gs
+
+  if (strict)
+  {
+    ss <- attr(fn, 'strict')
+    if (is.null(ss)) ss <- list()
+    ss[[child]] <- strict
+    attr(fn, 'strict') <- ss
+  }
+
+  assign(parent, fn, where, inherits=TRUE)
+
+  invisible()
 }
 
 # Get the guards for a function. The function can be either the parent or any
@@ -66,8 +99,10 @@ guards <- function(fn, inherits=TRUE)
   if (! is.function(fn))
     stop("Guard introspection can only be applied to functions")
 
-  gs <- attr(fn, 'guards', exact=TRUE)
-  if (! is.null(gs)) return(gs)
+  gfs <- attr(fn, 'guard.fns', exact=TRUE)
+  gxs <- attr(fn, 'guard.xps', exact=TRUE)
+  gs <- list(functions=gfs, expressions=gxs)
+  if (! is.null(gfs) || ! is.null(gxs)) return(gs)
   if (! inherits) return(gs)
 
   parent <- sub('\\.[^.]+$','', deparse(substitute(fn)))
@@ -103,8 +138,11 @@ UseFunction <- function(fn.name, ...)
   if (is.null(gs)) stop("Function must have guards for functional dispatching")
 
   args <- list(...)
-  for (f in names(gs))
+  # First iterate through formal functions. Formal functions have precedence
+  # over expressions.
+  for (f in names(gs$functions))
   {
+    # First check that this function is valid and matches the argument count
     f.exec <- get(f)
     if (is.null(f.exec)) next
     if (length(formals(f.exec)) != length(args)) next
@@ -117,7 +155,7 @@ UseFunction <- function(fn.name, ...)
       next
 
     valid <- TRUE
-    for (g in gs[[f]])
+    for (g in gs$functions[[f]])
     {
       if (is.logical(g)) valid <- valid && g
       else if (is.function(g)) valid <- valid && g(...)
@@ -126,6 +164,34 @@ UseFunction <- function(fn.name, ...)
         msg <- "Skipping invalid guard '%s' for function '%s'"
         cat(sprintf(msg, g, f))
       }
+      if (! valid) break
+    }
+    if (valid) return(do.call(f, list(...)))
+  }
+
+  # Now loop through guard expressions
+  for (f in names(gs$expressions))
+  {
+    # First check that this function is valid and matches the argument count
+    f.exec <- get(f)
+    if (is.null(f.exec)) next
+    if (length(formals(f.exec)) != length(args)) next
+
+    # If strict, match exactly the function arguments with the arguments
+    # passed in. This is the default behavior.
+    non.empty <- names(args)[nchar(names(args)) > 0]
+    if (length(non.empty) > 0 && isStrict(f) && 
+        length(setdiff(non.empty, names(formals(f)))) > 0 )
+      next
+
+    valid <- TRUE
+    # Construct functions based on the function definition
+    for (g in gs$expressions[[f]])
+    {
+      my.args <- paste(names(formals(collide.2)), collapse=',')
+      xps <- parse(text=sprintf("my.guard <- function(%s) { %s }", my.args, g))
+      eval(xps)
+      valid && my.guard(...)
       if (! valid) break
     }
     if (valid) return(do.call(f, list(...)))
