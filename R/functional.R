@@ -15,12 +15,18 @@ register <- function(fn.name, where)
 guard <- function(child.fn, condition, strict=TRUE)
 {
   child <- deparse(substitute(child.fn))
-  parent <- sub('\\.[^.]+$','', child)
 
   expr <- deparse(substitute(condition))
-  if (length(grep('function', expr)) < 1 && expr != 'TRUE' && expr != 'FALSE') 
+  if (length(grep('function', expr)) < 1) 
     return(.guard.expression(child, expr, strict))
 
+  return(.guard.function(child, condition, strict))
+}
+
+# Shortcut form for simple pattern matches
+.guard.function <- function(child, condition, strict)
+{
+  parent <- sub('\\.[^.]+$','', child)
   where <- paradigm.options(parent)
   if (is.null(where)) where <- -1
 
@@ -46,12 +52,6 @@ guard <- function(child.fn, condition, strict=TRUE)
   assign(parent, fn, where, inherits=TRUE)
 
   invisible()
-}
-
-# Shortcut form for simple pattern matches
-.guard.pattern <- function(fn, expr, result)
-{
-
 }
 
 # Shortcut form for expressions instead of more verbose functions
@@ -135,7 +135,9 @@ UseFunction <- function(fn.name, ...)
 {
   fn <- get(fn.name)
   gs <- guards(fn, inherits=FALSE)
-  if (is.null(gs)) stop("Function must have guards for functional dispatching")
+  if (is.null(gs)) stop("Incorrect guard output. Please report to maintainer.")
+  if (is.null(gs$functions) && is.null(gs$expressions))
+    stop("Function must have guards for functional dispatching")
 
   args <- list(...)
   # First iterate through formal functions. Formal functions have precedence
@@ -188,10 +190,10 @@ UseFunction <- function(fn.name, ...)
     # Construct functions based on the function definition
     for (g in gs$expressions[[f]])
     {
-      my.args <- paste(names(formals(collide.2)), collapse=',')
+      my.args <- paste(names(formals(f.exec)), collapse=',')
       xps <- parse(text=sprintf("my.guard <- function(%s) { %s }", my.args, g))
       eval(xps)
-      valid && my.guard(...)
+      valid <- valid && my.guard(...)
       if (! valid) break
     }
     if (valid) return(do.call(f, list(...)))
