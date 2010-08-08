@@ -165,7 +165,10 @@ UseFunction <- function(fn.name, ...)
       {
         msg <- "Skipping invalid guard '%s' for function '%s'"
         cat(sprintf(msg, g, f))
+        next
       }
+      # NOTE: If later on we want guard sequences instead, test for valid
+      # instead so the logic becomes a disjunction
       if (! valid) break
     }
     if (valid) return(do.call(f, list(...)))
@@ -190,6 +193,7 @@ UseFunction <- function(fn.name, ...)
     # Construct functions based on the function definition
     for (g in gs$expressions[[f]])
     {
+      my.guard <- NULL
       my.args <- paste(names(formals(f.exec)), collapse=',')
       xps <- parse(text=sprintf("my.guard <- function(%s) { %s }", my.args, g))
       eval(xps)
