@@ -44,7 +44,9 @@ isa(type, argument)
 \details{
 Guards are naturally scoped based on the number of arguments in a function.
 Hence only functions with the same number of arguments as were passed into the
-parent function will be considered for dispatching.
+parent function will be considered for dispatching. Guards can also be defined
+in a short-hand as an expression that is dynamically bound to the actual
+function implementation at run-time.
 
 When using strict guards (the default behavior) named arguments passed into the
 parent function must match the named arguments defined in the child function.
@@ -63,9 +65,12 @@ precondition plus any conditions defined by the guards. In certain circumstances
 this may be desired, although in general strict guards provides greater control.
 
 The order that the function guards are defined determines the order that 
-functions are evaluated for satisfaction of guard criteria. This is a detail
-that is important to understand as default functions defined too early will be
-greedy and no other criteria will be evaluated. 
+functions are evaluated for satisfaction of guard criteria. This behavior is
+typically called top-to-bottom, left-to-right evaluation. The left-to-right
+evaluation only applies to the explicit form when multiple function guards are
+defined in a vector. These details are important to understand as default 
+functions defined too early will be greedy and no other criteria will be 
+evaluated. 
 
 Another important consideration is that using the ellipsis argument is not 
 supported in futile.paradigm. This is by design as the functional programming
@@ -93,7 +98,7 @@ defined. This essentially shows the evaluation path that UseFunction will take.
 
 'isStrict' returns a logical value.
 
-'isa' returns a logical value.
+'isa' returns a logical value indicating whether a variable is an instance of class
 }
 
 \author{ Brian Lee Yung Rowe }
@@ -108,13 +113,15 @@ defined. This essentially shows the evaluation path that UseFunction will take.
 # using built-in R features.
 logarithm <- function(...) UseFunction('logarithm', ...)
 
+# Explicit form
 guard(logarithm.base, function(x,y) is.numeric(x) && is.numeric(y))
 logarithm.base <- function(x,y) log(x, base=y)
 
 guard(logarithm.default2, TRUE)
 logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
-guard(logarithm.1, function(x) is.numeric(x))
+# Abbreviated form
+guard(logarithm.1, is.numeric(x))
 logarithm.1 <- function(x) logarithm(x, exp(1))
 
 # Defaults are applied on a per-argument length basis
