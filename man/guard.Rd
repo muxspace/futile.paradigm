@@ -143,6 +143,9 @@ logarithm.base <- function(x,y) log(x, base=y)
 guard(logarithm.default2, TRUE)
 logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
+# View the function variants for this abstract function
+guards(logarithm)
+
 }
 \keyword{ methods }
 \keyword{ programming }

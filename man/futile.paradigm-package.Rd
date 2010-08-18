@@ -27,7 +27,12 @@ In contrast to UseMethod, which is used for S3 object-oriented
 method dispatching, futile.paradigm introduces UseFunction for functional
 programming. Since UseMethod only detects the type of the first argument, 
 dispatching can be tricky/cumbersome when multiple arguments and/or types are
-supported.  This package provides a richer syntax for defining functions
+supported. Also, the direct manipulation of class attributes is dangerous in
+the S3 paradigm. In the futile.paradigm, access is restricted via encapsulation
+to reduce the fragility of such a mechanism. In lieu of the S4 style that
+requires significant up-front design, the futile.paradigm intends to ease
+the development process from initial experimentation to systems development.
+This package provides a richer syntax for defining functions
 including the constraints that must be satisfied in order to dispatch to the
 particular function. A happy consequence of this approach is that code becomes
 self-documenting and functions are more concise since there is a clean
@@ -39,16 +44,20 @@ consistent with UseMethod for ease of adoption. The base, or parent, function
 is defined with a call to UseFunction. This establishes the necessary 
 dispatching for the futile.paradigm.
 
-Implementations of the function, the child functions, must be defined in a
-hierarchical naming scheme based on the parent function. Similar to UseMethod,
-the child function name is derived from the parent function with a unique 
+Concrete implementations of the abstract function, must be defined in a
+hierarchical naming scheme based on the name of the abstract function. 
+Similar to UseMethod,
+the concrete function name is derived from the abstract function with a unique 
 suffix separated by a dot. Unlike UseMethod, the suffix is arbitrary as the 
 dispatching and association is controlled by the guard and the number of 
-arguments in the child function. Guards are functions taking the same number of
-arguments as the child function it is guarding and must return a boolean value.
+arguments in the concrete function. Guards are expressions using the same
+variables as the concrete function variant or explicit functions operating
+on the same number of arguments as the concrete function it is guarding.
+Either form of a guard must return a boolean value.
 Multiple guard functions can be defined in the guard call and in this situation
 all guards must resolve to TRUE for the function to execute. In addition to a
-function, a default function can be defined by setting the guard to TRUE.
+function, a default function can be defined by setting the guard expression
+to TRUE.
 
 By convention the guard is declared before the function definition as this 
 communicates immediately the criteria required to execute this particular 
@@ -77,27 +86,28 @@ Some background on using guards and pattern matching:
 # Define the parent function that calls the dispatcher
 abs.max <- function(...) UseFunction('abs.max', ...)
 
-# By convention the guard is defined before the function
-guard(abs.max.twoArg, c( function(a,b) is.numeric(a), function(a,b) is.numeric(b)) )
-# Define a child function
-abs.max.twoArg <- function(a, b) max(abs(a), abs(b))
-
-guard(abs.max.twoArgDefault, TRUE)
-abs.max.twoArgDefault <- function(a,b) abs.max(as.numeric(a), as.numeric(b))
-
-guard(abs.max.recursive1, function(a) is.numeric(a) && length(a) > 1)
+# By convention the guard is defined before the concrete function variant
+guard(abs.max.recursive1, is.numeric(a) && length(a) > 1)
 abs.max.recursive1 <- function(a) abs.max(a[1], abs.max(a[2:length(a)]))
 
-guard(abs.max.recursive2, function(a) is.numeric(a) && length(a) == 1)
+guard(abs.max.recursive2, is.numeric(a) && length(a) == 1)
 abs.max.recursive2 <- function(a) a
 
-guard(abs.max.csv, function(a) is.character(a) && grep(',',a,fixed=TRUE) == 1) 
+guard(abs.max.csv, is.character(a) && grep(',',a,fixed=TRUE) == 1) 
 abs.max.csv <- function(a)
   abs.max(as.numeric(strsplit(a, ',', fixed=TRUE)[[1]]))
 
-guard(abs.max.psv, function(a) is.character(a) && grep('|',a,fixed=TRUE) == 1) 
+guard(abs.max.psv, is.character(a) && grep('|',a,fixed=TRUE) == 1) 
 abs.max.psv <- function(a)
   abs.max(as.numeric(strsplit(a, '|', fixed=TRUE)[[1]]))
+
+# The explicit form allows multiple guard functions
+guard(abs.max.twoArg, c( function(a,b) is.numeric(a), function(a,b) is.numeric(b)) )
+abs.max.twoArg <- function(a, b) max(abs(a), abs(b))
+
+# Using a guard of TRUE acts as a default condition
+guard(abs.max.twoArgDefault, TRUE)
+abs.max.twoArgDefault <- function(a,b) abs.max(as.numeric(a), as.numeric(b))
 
 
 # Test some output
