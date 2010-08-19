@@ -39,7 +39,7 @@ isa(type, argument)
     for a parent function. Typically this is safe to leave as the default}
   \item{fn.name}{The name of the function to register}
   \item{where}{The position or environment to find the function }
-  \item{type}{A character describing the type to match}
+  \item{type}{A symbol or character describing the type to match}
   \item{argument}{The argument to match type with}
 }
 \details{
@@ -99,8 +99,11 @@ function resides. This is necessary for package development where the calling
 environment doesn't seem to be registered properly.
 
 The 'isa' function is used to perform type checking. Calling the function checks
-whether 'argument' is a 'type'. This is simply syntactic sugar for convenience
-in guard sequences.
+whether 'argument' is a 'type'. This is more than syntactic sugar 
+in guard sequences as it adds a level of protective indirection when accessing
+type information. Note that the preferred format is to supply a raw symbol to
+isa, and following naming conventions, it is easy to infer the meaning from 
+the syntax without undue clutter.
 
 }
 \value{
@@ -145,6 +148,11 @@ logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
 # View the function variants for this abstract function
 guards(logarithm)
+
+# In the futile.paradigm, the convention is to name types in PascalCase
+a <- create(Apple, seeds=103)
+isa(Apple,a)
+
 
 }
 \keyword{ methods }

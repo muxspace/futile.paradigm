@@ -125,7 +125,11 @@ isStrict <- function(child.fn)
   FALSE
 }
 
-isa <- function(type, argument) type %in% class(argument)
+isa <- function(type, argument)
+{
+  type <- gsub('[\'"]','',deparse(substitute(type)))
+  type %in% class(argument)
+}
 
 
 # Dispatcher for a more functional paradigm. This executes a function based on
