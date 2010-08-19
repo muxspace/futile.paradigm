@@ -21,8 +21,8 @@ create.default <- function(type, ...)
   o
 }
 
-access <- function(x, ...) AbuseMethod('access', x, ...)
-update <- function(x, ...) AbuseMethod('update', x, ...)
-delete <- function(x, ...) AbuseMethod('delete', x, ...)
+#access <- function(x, ...) AbuseMethod('access', x, ...)
+#update <- function(x, ...) AbuseMethod('update', x, ...)
+#delete <- function(x, ...) AbuseMethod('delete', x, ...)
 
 
