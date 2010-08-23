@@ -22,9 +22,11 @@ create.default(type, ...)
   defines any defaults needed. This is similar to the S4 style but is simpler
   and not a requirement for using the rest of futile.paradigm.
 
-  Note that in general the futile.paradigm avoids strings where syntax is
+  In general the futile.paradigm avoids strings where syntax is
   explicit enough that this is possible. By convention types are PascalCased,
-  which makes identifying a type even clearer.
+  which makes identifying a type even clearer. For this to work properly, it
+  is essential that class names are not defined as types as defined symbols
+  are assumed to be valid for dereferencing. 
 }
 \value{
   'create' returns an object of the requested type.
@@ -35,6 +37,11 @@ create.default(type, ...)
 \examples{
 create.Car <- function(x, wheels=4, doors=2) list(wheels=wheels, doors=doors)
 my.car <- create(Car, doors=4)
+
+your.car <- create('Car', wheels=6)
+
+her.class <- 'Car'
+her.car <- create(her.class, wheels=3)
 
 isa(Car, my.car)
 }

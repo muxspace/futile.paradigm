@@ -5,6 +5,14 @@ create <- function(x, ...)
 {
   type <- deparse(substitute(x))
   type <- gsub('"','', type)
+  err.obj <- NULL
+  tryCatch(is.same <- type == x, error=function(e) err.obj <<- e)
+
+  # ! is.null(err.obj) => use type (class symbol provided)
+  # is.same => use type (string representation of class name)
+  # else => use x (dynamically evaluated class name)
+  if (is.null(err.obj) && ! is.same) type <- x
+
   # This is a special construction for create
   o <- AbuseMethod('create', type, type, ..., EXPLICIT=TRUE)
   class(o) <- c(type,class(o))
