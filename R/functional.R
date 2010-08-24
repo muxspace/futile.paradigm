@@ -217,12 +217,16 @@ UseFunction <- function(fn.name, ...)
 # extended by user code. This produces some consistency in the way common
 # operations are called. Functions dispatched from AbuseMethod can contain 
 # UseFunction declarations for further dispatching.
-AbuseMethod <- function(fn.name, type, ..., EXPLICIT=FALSE)
+AbuseMethod <- function(fn.name, type, ..., EXPLICIT=FALSE, ALWAYS=TRUE)
 {
   if (EXPLICIT)
   {
     target <- paste(fn.name,type,sep='.')
-    if (! exists(target)) target <- paste(fn.name,'default',sep='.')
+    if (! exists(target))
+    {
+      if (ALWAYS) target <- paste(fn.name,'default',sep='.')
+      else stop("No valid method found")
+    }
 
     do.call(target, list(...) )
   }
@@ -234,7 +238,11 @@ AbuseMethod <- function(fn.name, type, ..., EXPLICIT=FALSE)
       target <- paste(fn.name,t,sep='.')
       if (exists(target)) break
     }
-    if (! exists(target)) target <- paste(fn.name,'default',sep='.')
+    if (! exists(target))
+    {
+      if (ALWAYS) target <- paste(fn.name,'default',sep='.')
+      else stop("No valid method found")
+    }
     do.call(target, c(type, list(...)) )
   }
 }
