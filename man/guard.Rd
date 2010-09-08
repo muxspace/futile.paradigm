@@ -123,7 +123,7 @@ defined. This essentially shows the evaluation path that UseFunction will take.
   not apply here since this function is used to implement the framework itself.
 }
 
-\seealso{ \code{\link{UseFunction}} }
+\seealso{ \code{\link{UseFunction}}, \code{\link{ensure}} }
 \examples{
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
