@@ -5,8 +5,8 @@ create.Pear <<- function(klass, seeds=5, weight=10, type='bartlett')
 
 test.create.default <- function()
 {
-  a <- create('Apple', seeds=10)
-  checkTrue(isa('Apple',a))
+  a <- create(Apple, seeds=10)
+  checkTrue(isa(Apple,a))
   checkTrue(a$seeds == 10)
 }
 

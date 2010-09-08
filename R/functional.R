@@ -101,6 +101,28 @@ isa <- function(type, argument)
   type %in% class(argument)
 }
 
+# Note this will produce a vector of results
+hasa <- function(property, argument)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  props %in% names(argument)
+}
+
+# If all properties exist
+hasall <- function(property, argument)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  all(props %in% names(argument))
+}
+
 
 # Dispatcher for a more functional paradigm. This executes a function based on
 # which guards are matched. The order of evaluation is based on the order the

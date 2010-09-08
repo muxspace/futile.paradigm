@@ -4,6 +4,8 @@
 \alias{register}
 \alias{isStrict}
 \alias{isa}
+\alias{hasa}
+\alias{hasall}
 
 \title{
   Add guards to a function to define the conditions when a child function will
@@ -24,6 +26,8 @@ register(fn.name, where)
 guard(child.fn, condition, strict = TRUE)
 guards(fn, inherits = TRUE)
 isa(type, argument)
+hasa(property, argument)
+hasall(property, argument)
 }
 \arguments{
   \item{child.fn}{This is the function for which the guard is applied. It does
@@ -40,7 +44,8 @@ isa(type, argument)
   \item{fn.name}{The name of the function to register}
   \item{where}{The position or environment to find the function }
   \item{type}{A symbol or character describing the type to match}
-  \item{argument}{The argument to match type with}
+  \item{argument}{The argument to match the type or properties with}
+  \item{property}{The property or properties to look for within the object}
 }
 \details{
 Guards provide declarative dispatching of function variants consistent with the
@@ -116,6 +121,11 @@ defined. This essentially shows the evaluation path that UseFunction will take.
 'isStrict' returns a logical value.
 
 'isa' returns a logical value indicating whether a variable is an instance of class
+
+'hasa' returns a logical value indicating whether a property exists in an object
+
+'hasall' returns the conjunction of all hasa results for an object. This is 
+useful if a set of properties are required for execution.
 }
 
 \author{ Brian Lee Yung Rowe }
