@@ -89,3 +89,40 @@ interpolate <<- function(...) UseFunction('interpolate',...)
 guard(interpolate, isa('linear', cfg))
 interpolate <<- function(cfg, a,b) { }
 
+
+## TESTS FOR ENSURE
+guard(logarithm.1, is.numeric(x))
+logarithm.1 <<- function(x) logarithm(x, exp(1))
+ensure(logarithm.1, ! is.nan(result) && ! is.infinite(result))
+
+guard(logarithm.default1, TRUE)
+logarithm.default1 <<- function(x) logarithm(as.numeric(x))
+
+guard(logarithm.base, function(x,y) is.numeric(x) && is.numeric(y))
+logarithm.base <<- function(x,y) log(x, base=y)
+
+guard(logarithm.default2, TRUE)
+logarithm.default2 <<- function(x,y) logarithm(as.numeric(x), as.numeric(y))
+
+
+test.logarithm.int <- function()
+{
+  checkTrue(0 == logarithm(1,5))
+  checkTrue(3 == logarithm(y=2, 8))
+}
+
+test.logarithm.neg <- function()
+{
+  cat("Expecting failed assertion\n")
+  checkException(logarithm(-1))
+}
+
+test.logarithm.paths <- function()
+{
+  # Assertion is on logarithm.1
+  checkException(logarithm(-1))
+  # But not on logarithm.base
+  checkTrue(is.infinite(logarithm(5,1)))
+}
+
+
