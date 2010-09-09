@@ -55,7 +55,7 @@ assertions for a given abstract function.
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
 # using built-in R features.
-logarithm <- function(...) UseFunction('logarithm', ...)
+#logarithm <- function(...) UseFunction('logarithm', ...)
 
 # Abbreviated form (recommended)
 # The expression must operate on arguments declared in the concrete function.
