@@ -171,14 +171,16 @@ UseFunction <- function(fn.name, ...)
   else NULL
 }
 
+.GUARD_EXPRESSION <- "%s <- function(%s) { %s }"
 .validateGuardExpression <- function(g,f, ...)
 {
   f.exec <- get(f)
-  my.guard <- NULL
+  fn.handle <- paste('.guard',f,sep='_')
   my.args <- paste(names(formals(f.exec)), collapse=',')
-  xps <- parse(text=sprintf("my.guard <- function(%s) { %s }", my.args, g))
+  xps <- parse(text=sprintf(.GUARD_EXPRESSION, fn.handle,my.args, g))
   eval(xps)
-  my.guard(...)
+  #eval(parse(text=sprintf("%s(...)",fn.handle)))
+  eval(parse(text=sprintf("%s(...)",fn.handle)))
 }
 
 .applyGuard <- function(guards, validator, ...)

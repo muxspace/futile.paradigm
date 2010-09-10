@@ -97,13 +97,14 @@ ensures <- function(fn, inherits=TRUE, child=NULL)
   g(result, ...)
 }
 
+.ENSURE_EXPRESSION <- "%s <- function(result,%s) { %s }"
 .validateEnsureExpression <- function(g,f, result, ...)
 {
   f.exec <- get(f)
-  my.guard <- NULL
+  fn.handle <- paste('.ensure',f,sep='_')
   my.args <- paste(names(formals(f.exec)), collapse=',')
-  xps <- parse(text=sprintf("my.guard <- function(result,%s) { %s }", my.args, g))
+  xps <- parse(text=sprintf(.ENSURE_EXPRESSION, fn.handle,my.args, g))
   eval(xps)
-  my.guard(result, ...)
+  eval(parse(text=sprintf("%s(result, ...)",fn.handle)))
 }
 
