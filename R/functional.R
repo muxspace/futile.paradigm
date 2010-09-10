@@ -123,10 +123,13 @@ hasall <- function(property, argument)
   all(props %in% names(argument))
 }
 
+.SIMPLE_TYPES <- c('numeric','character','POSIXt','POSIXct')
+.is.simple <- function(x) any(class(x) %in% .SIMPLE_TYPES)
 
 # Dispatcher for a more functional paradigm. This executes a function based on
 # which guards are matched. The order of evaluation is based on the order the
 # guards are declared.
+.ERR_USE_FUNCTION <- "No valid function for '%s/%s' (%s)"
 UseFunction <- function(fn.name, ...)
 {
   result <- NULL
@@ -141,8 +144,10 @@ UseFunction <- function(fn.name, ...)
     matched.fn <- .applyGuard(gs$expressions, .validateGuardExpression, ...)
   if (is.null(matched.fn))
   {
-    arg.names <- paste(names(list(...)), collapse=', ')
-    stop(sprintf("No valid function for arguments [%s]", arg.names))
+    args <- sapply(list(...), function(x) ifelse(.is.simple(x),x,'<object>'))
+    arg.names <- paste(args, collapse=', ')
+    arg.length <- length(args)
+    stop(sprintf(.ERR_USE_FUNCTION, fn.name, arg.length, arg.names))
   }
 
   result <- do.call(matched.fn, list(...))
