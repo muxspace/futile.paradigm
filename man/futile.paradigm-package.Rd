@@ -67,8 +67,8 @@ errors.
 
 Conventions:
 . Types are named in PascalCase
-. Functions are named in lower case with words separated by underscore (_)
-. Function namespaces are separated by dot (.)
+. Functions are named in lower case with words separated by underscore
+. Function namespaces are separated by dot
 . Declare guard statements before concrete implementations
 . Declare ensure statements after concrete implementations
 . Avoid explicit UseFunction definitions
