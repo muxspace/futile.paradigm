@@ -14,12 +14,12 @@ UseFunction(fn.name, ...)
   \item{\dots}{The arguments that are passed to dispatched functions }
 }
 \details{
-  Defining functions for dispatching based on guards requires following a simple
-  template:
+  In most situations (i.e. following the conventions outlined by the
+  futile.paradigm), explicit use of UseFunction is unnecessary as the
+  system will automatically generate and execute this command as necessary.
+
+  Explicit function definitions follow a simple template:
     fn.var <- function(...) UseFunction('fn.var', ...)
-  Once this initial declaration is made, then guards and child functions can be
-  declared. If the parent declaration is not made, then calling 'guard' will
-  result in an error.
 
   When calling the function, if no guards match, then an error is returned.
 }
@@ -37,16 +37,16 @@ UseFunction(fn.name, ...)
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
 # using built-in R features.
-reciprocal <- function(...) UseFunction('reciprocal', ...)
+
+# Optional
+#reciprocal <- function(...) UseFunction('reciprocal', ...)
 
 guard(reciprocal.1, is.numeric(x) && x != 0)
 reciprocal.1 <- function(x) 1 / x
+ensure(reciprocal.1, sign(result) == sign(x))
 
 guard(reciprocal.2, is.character(x))
 reciprocal.2 <- function(x) reciprocal(as.numeric(x))
-
-guard(reciprocal.default, TRUE)
-reciprocal.default <- function(x) stop("Undefined for 0")
 
 reciprocal(4)
 

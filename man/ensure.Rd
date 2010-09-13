@@ -4,14 +4,14 @@
 
 \title{
   Add post-assertion validations to a function to define the conditions when 
-  the results of a child function are valid
+  results of a child function are valid
 }
 \description{
   The 'ensure' function defines the conditions for successful execution for 
   the given function. This is an optional declaration that requires a previous
   guard declaration for the given function.
 
-  The 'ensures' function provides introspection and displays assertions defined
+  The 'ensures' function provides reflection and displays assertions defined
   for a function hierarchy. 
 }
 \usage{
@@ -37,9 +37,15 @@ ensures(fn, inherits = TRUE, child = NULL)
 \details{
 Combining guards with post-execution assertions provides a framework for 
 design-by-contract programming. This paradigm forces developers to define
-the API for each function explicitly in the code. Doing so ensures that 
+the programming interface for each function explicitly in the code. Doing 
+so ensures that 
 failures are detected immediately (known as fail-fast) reducing troubleshooting
 time. Using the 'ensure' command is optional.
+
+When using an expression in the ensure command, the executed function is
+called with the following arguments: the result of the concrete function
+(named 'result') followed by the arguments passed to the concrete function.
+If the condition fails, execution will halt with an error message.
 }
 \value{
 The 'ensure' declaration is used for its side-effects and has no return value.
@@ -55,16 +61,14 @@ assertions for a given abstract function.
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
 # using built-in R features.
+
+# This is optional except when naming is ambiguous
 #logarithm <- function(...) UseFunction('logarithm', ...)
 
 # Abbreviated form (recommended)
 # The expression must operate on arguments declared in the concrete function.
 guard(logarithm.1, is.numeric(x))
 logarithm.1 <- function(x) logarithm(x, exp(1))
-
-# Defaults are applied on a per-argument length basis
-guard(logarithm.default1, TRUE)
-logarithm.default1 <- function(x) logarithm(as.numeric(x))
 
 # Explicit form (only necessary for special cases)
 guard(logarithm.base, function(x,y) is.numeric(x) && is.numeric(y))
@@ -74,9 +78,13 @@ ensure(logarithm.base, ! is.nan(result) && ! is.infinite(result))
 guard(logarithm.default2, TRUE)
 logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
+# Uses all arguments in assertion
+guard(f, is.numeric(a) & is.numeric(b) & b > 1)
+f <- function(a,b) a + b
+ensure(f, result == a + b)
+
 # View the function variants for this abstract function
 ensures(logarithm)
-
 
 }
 \keyword{ methods }

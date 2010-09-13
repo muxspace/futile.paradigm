@@ -138,7 +138,9 @@ useful if a set of properties are required for execution.
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
 # using built-in R features.
-logarithm <- function(...) UseFunction('logarithm', ...)
+
+# This is optional and only required when naming is ambiguous
+#logarithm <- function(...) UseFunction('logarithm', ...)
 
 # Abbreviated form (recommended)
 # The expression must operate on arguments declared in the concrete function.
@@ -162,7 +164,7 @@ guards(logarithm)
 # In the futile.paradigm, the convention is to name types in PascalCase
 a <- create(Apple, seeds=103)
 isa(Apple,a)
-
+hasa(c(seeds, stem), a)
 
 }
 \keyword{ methods }
