@@ -17,7 +17,7 @@ guard <- function(child.fn, condition, strict=TRUE)
   child <- deparse(substitute(child.fn))
 
   expr <- deparse(substitute(condition))
-  if (length(grep('function', expr)) < 1) 
+  if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
     return(.guard(child, expr, strict, label='guard.xps'))
 
   return(.guard(child, condition, strict, label='guard.fns'))
