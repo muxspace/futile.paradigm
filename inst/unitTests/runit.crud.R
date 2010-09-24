@@ -1,4 +1,4 @@
-create.Pear <<- function(klass, seeds=5, weight=10, type='bartlett')
+create.Pear <- function(klass, seeds=5, weight=10, type='bartlett')
 {
   list(seeds=seeds, weight=weight, type=type)
 }

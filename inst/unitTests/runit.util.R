@@ -1,4 +1,4 @@
-o <<- create(Dummy, a=3, c=5)
+o <- create(Dummy, a=3, c=5)
 
 test.hasa.single <- function()
 {
