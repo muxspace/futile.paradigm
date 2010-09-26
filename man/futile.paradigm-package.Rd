@@ -61,9 +61,14 @@ communicates immediately the criteria required to execute this particular
 implementation of the parent function.  See the examples section for a trivial
 implementation.
 
-Post assertions are used to verify results from a function are as expected.
-This approach ensures functions fail fast, making it simpler to identify
-errors.
+In addition to guard statements, this package provides post-assertions 
+reminiscent of Eiffel's design-by-contract approach. Using 'ensure' 
+declarations validates function outputs and fails if they aren't satisfied.
+The arguments to a generated assertion are ordered with the result object
+first (named 'result'), then all of the function arguments.
+
+In many ways R is a functional language. Futile.paradigm complements R's 
+functional strengths to make it easier to develop software in this paradigm.
 
 Conventions:
 . Types are named in PascalCase
@@ -96,18 +101,25 @@ Some background on using guards and pattern matching:
 
 # By convention the guard is defined before the concrete function variant
 guard(abs_max.recursive1, is.numeric(a) && length(a) > 1)
+
+# This adds a post-assertion to ensure the value is what you expect
+ensure(abs_max.recursive1, result > 0)
+
 abs_max.recursive1 <- function(a) abs_max(a[1], abs_max(a[2:length(a)]))
 
 guard(abs_max.recursive2, is.numeric(a) && length(a) == 1)
+ensure(abs_max.recursive2, result == a)
 abs_max.recursive2 <- function(a) a
 
 guard(abs_max.csv, isa(DataObject,a) & hasa(data,a))
 abs_max.csv <- function(a) abs_max(as.numeric(strsplit(a$data, ',')[[1]]))
 
 # The explicit form allows multiple guard functions
-guard(abs_max.twoArg, c( function(a,b) is.numeric(a), function(a,b) is.numeric(b)) )
-abs_max.twoArg <- function(a, b) max(abs(a), abs(b))
+guard(abs_max.twoArg, c(
+  function(a,b) is.numeric(a),
+  function(a,b) is.numeric(b)) )
 ensure(abs_max.twoArg, result >= a | result >= b)
+abs_max.twoArg <- function(a, b) max(abs(a), abs(b))
 
 # Using a guard of TRUE acts as a default condition
 guard(abs_max.twoArgDefault, TRUE)

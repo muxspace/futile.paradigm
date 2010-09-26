@@ -42,8 +42,8 @@ UseFunction(fn.name, ...)
 #reciprocal <- function(...) UseFunction('reciprocal', ...)
 
 guard(reciprocal.1, is.numeric(x) && x != 0)
-reciprocal.1 <- function(x) 1 / x
 ensure(reciprocal.1, sign(result) == sign(x))
+reciprocal.1 <- function(x) 1 / x
 
 guard(reciprocal.2, is.character(x))
 reciprocal.2 <- function(x) reciprocal(as.numeric(x))
