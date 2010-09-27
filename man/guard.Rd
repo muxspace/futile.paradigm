@@ -1,7 +1,6 @@
 \name{guard}
 \alias{guard}
 \alias{guards}
-\alias{register}
 \alias{isStrict}
 \alias{isa}
 \alias{hasa}
@@ -22,7 +21,6 @@
   The 'isa' function performs type checking.
 }
 \usage{
-register(fn.name, where)
 guard(child.fn, condition, strict = TRUE)
 guards(fn, inherits = TRUE)
 isa(type, argument)
@@ -41,8 +39,6 @@ hasall(property, argument)
     parent function will be queried}
   \item{inherits}{If a function is passed that has no guards, whether to search
     for a parent function. Typically this is safe to leave as the default}
-  \item{fn.name}{The name of the function to register}
-  \item{where}{The position or environment to find the function }
   \item{type}{A symbol or character describing the type to match}
   \item{argument}{The argument to match the type or properties with}
   \item{property}{The property or properties to look for within the object}
@@ -98,10 +94,6 @@ ellipsis argument should never be needed in a child function definition.
 
 The 'isStrict' function is an introspective function that indicates whether
 the given child function has strict guards or not.
-
-The 'register' function is used to manually register environments that a 
-function resides. This is necessary for package development where the calling
-environment doesn't seem to be registered properly.
 
 The 'isa' function is used to perform type checking. Calling the function checks
 whether 'argument' is a 'type'. This is more than syntactic sugar 
