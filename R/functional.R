@@ -11,6 +11,10 @@ guard <- function(child.fn, condition, strict=TRUE)
   child <- deparse(substitute(child.fn))
 
   expr <- deparse(substitute(condition))
+  # For debugging
+  #  cat("[From guard]\n")
+  #  cat("Parent: "); print(parent.frame())
+  #  cat("TopEnv: "); print(topenv(parent.frame()))
   if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
     return(.guard(child, expr, strict, label='guard.xps'))
 
@@ -23,6 +27,11 @@ guard <- function(child.fn, condition, strict=TRUE)
 {
   parent <- sub('\\.[^.]+$','', child)
   where <- paradigm.options(parent)
+  # For debugging
+  #  cat("[From .guard]\n")
+  #  cat("Parent: "); print(parent.frame(2))
+  #  cat("TopEnv: "); print(topenv(parent.frame(2)))
+
   # We use 2 because this is called from within the 'guard' function so the
   # stack is two down
   if (is.null(where)) where <- topenv(parent.frame(2))
