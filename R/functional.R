@@ -62,7 +62,7 @@ guard <- function(child.fn, condition, strict=TRUE)
 {
   parent <- sub('\\.[^.]+$','', child)
   where <- paradigm.options(parent)
-  #if (is.null(where)) where <- parent.env(parent.env(environment()))
+  # We use 2 because this is called from within the 'guard' function
   if (is.null(where)) where <- parent.frame(2)
 
   if (! exists(parent, where))
