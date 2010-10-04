@@ -134,6 +134,12 @@ hasall <- function(property, argument)
 
 .SIMPLE_TYPES <- c('numeric','character','POSIXt','POSIXct')
 .is.simple <- function(x) any(class(x) %in% .SIMPLE_TYPES)
+.as.simple <- function(x)
+{
+  if (! .is.simple(x)) return(class(x)[1])
+  if (length(x) < 5) sprintf("c(%s)", paste(x, collapse=','))
+  else sprintf("(%s, ...)", paste(x[1:4], collapse=','))
+}
 
 # Dispatcher for a more functional paradigm. This executes a function based on
 # which guards are matched. The order of evaluation is based on the order the
@@ -153,7 +159,7 @@ UseFunction <- function(fn.name, ...)
     matched.fn <- .applyGuard(gs$expressions, .validateGuardExpression, ...)
   if (is.null(matched.fn))
   {
-    args <- sapply(list(...), function(x) ifelse(.is.simple(x),x,'<object>'))
+    args <- sapply(list(...), .as.simple)
     arg.names <- paste(args, collapse=', ')
     arg.length <- length(args)
     stop(sprintf(.ERR_USE_FUNCTION, fn.name, arg.length, arg.names))
