@@ -137,14 +137,16 @@ hasall <- function(property, argument)
 .as.simple <- function(x)
 {
   if (! .is.simple(x)) return(class(x)[1])
+  if (length(x) == 1) return(x)
   if (length(x) < 5) sprintf("c(%s)", paste(x, collapse=','))
-  else sprintf("(%s, ...)", paste(x[1:4], collapse=','))
+  else sprintf("c(%s, ...)", paste(x[1:4], collapse=','))
 }
 
 # Dispatcher for a more functional paradigm. This executes a function based on
 # which guards are matched. The order of evaluation is based on the order the
 # guards are declared.
-.ERR_USE_FUNCTION <- "No valid function for '%s/%s' (%s)"
+.ERR_USE_FUNCTION <- "No valid function for '%s/%s' : %s"
+.ERR_ENSURE_FAILED <- "Assertion '%s' failed for args = %s and result = %s"
 UseFunction <- function(fn.name, ...)
 {
   result <- NULL
@@ -174,12 +176,21 @@ UseFunction <- function(fn.name, ...)
   idx <- .applyEnsure(es$functions, matched.fn,
     .validateEnsureFunction, result=result, ...)
   if (idx > 0)
-    stop(sprintf("Ensured assertion '%s' failed", es$functions[idx]))
+  {
+    err.msg <- sprintf(.ERR_ENSURE_FAILED, es$functions[idx], 
+      paste(sapply(list(...), .as.simple), collapse=', '), .as.simple(result))
+    stop(err.msg)
+  }
 
   idx <- .applyEnsure(es$expressions, matched.fn,
     .validateEnsureExpression, result=result, ...)
   if (idx > 0)
-    stop(sprintf("Ensured assertion '%s' failed", es$expressions[idx]))
+  {
+    err.msg <- sprintf(.ERR_ENSURE_FAILED, es$expressions[idx], 
+      paste(sapply(list(...), .as.simple), collapse=', '), .as.simple(result))
+    stop(err.msg)
+  }
+      
 
   result
 }
