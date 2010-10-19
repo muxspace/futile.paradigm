@@ -21,6 +21,9 @@ guard <- function(child.fn, condition, strict=TRUE)
   return(.guard(child, condition, strict, label='guard.fns'))
 }
 
+# This is the preferred form
+'%when%' <- guard
+
 # Shortcut form for simple pattern matches
 # label := { guard.xps, guard.fns }
 .guard <- function(child, condition, strict, label)
@@ -110,6 +113,12 @@ isa <- function(type, argument)
   type %in% class(argument)
 }
 
+'%isa%' <- function(argument, type)
+{
+  type <- gsub('[\'"]','',deparse(substitute(type)))
+  type %in% class(argument)
+}
+
 # Note this will produce a vector of results
 hasa <- function(property, argument)
 {
@@ -120,6 +129,27 @@ hasa <- function(property, argument)
   props <- strsplit(property, ',', fixed=TRUE)[[1]]
   props %in% names(argument)
 }
+
+'%hasa%' <- function(argument, property)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  props %in% names(argument)
+}
+
+'%hasall%' <- function(argument, property)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  all(props %in% names(argument))
+}
+
 
 # If all properties exist
 hasall <- function(property, argument)
@@ -213,6 +243,13 @@ UseFunction <- function(fn.name, ...)
   #eval(parse(text=sprintf("%s(...)",fn.handle)))
   eval(parse(text=sprintf("%s(...)",fn.handle)))
 }
+
+    # Experimental to try to include default arguments
+    #if (length(args) > length(formals(f.exec)) ) next
+    # This is the number of arguments without default values
+    #required <- sapply(formals(f.exec), function(x) x == '')
+    #min.args <- sum(ifelse(required,1,0))
+    #if (length(args) < min.args) next
 
 .applyGuard <- function(guards, validator, ...)
 {
