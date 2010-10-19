@@ -10,7 +10,7 @@ ensure <- function(child.fn, condition, strict=TRUE)
   return(.ensure(child, condition, strict, label='ensure.fns'))
 }
 
-'%asserts%' <- ensure
+'%must%' <- ensure
 
 # Shortcut form for expressions instead of more verbose functions
 # This is the standard way of writing ensures, although the long form is

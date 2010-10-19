@@ -115,7 +115,7 @@ interpolate <<- function(cfg, a,b) { }
 logarithm <<- function(...) UseFunction('logarithm',...)
 
 logarithm.1 %when% is.numeric(x)
-logarithm.1 %asserts% (! is.nan(result) && ! is.infinite(result))
+logarithm.1 %must% (! is.nan(result) && ! is.infinite(result))
 logarithm.1 <<- function(x) logarithm(x, exp(1))
 
 logarithm.default1 %when% TRUE
