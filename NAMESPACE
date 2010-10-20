@@ -1,3 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 export("%when%")
 export("%must%")
+export("%isa%")
+export("%hasa%")
+export("%hasall%")

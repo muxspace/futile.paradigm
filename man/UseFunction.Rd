@@ -17,6 +17,8 @@ UseFunction(fn.name, ...)
   In most situations (i.e. following the conventions outlined by the
   futile.paradigm), explicit use of UseFunction is unnecessary as the
   system will automatically generate and execute this command as necessary.
+  The only time it is necessary is when an abstract function has an 
+  ambiguous name (typically containing extraneous dots).
 
   Explicit function definitions follow a simple template:
     fn.var <- function(...) UseFunction('fn.var', ...)
@@ -41,11 +43,11 @@ UseFunction(fn.name, ...)
 # Optional
 #reciprocal <- function(...) UseFunction('reciprocal', ...)
 
-guard(reciprocal.1, is.numeric(x) && x != 0)
-ensure(reciprocal.1, sign(result) == sign(x))
+reciprocal.1 \%when\% (is.numeric(x) && x != 0)
+reciprocal.1 \%must\% (sign(result) == sign(x))
 reciprocal.1 <- function(x) 1 / x
 
-guard(reciprocal.2, is.character(x))
+reciprocal.2 \%when\% is.character(x)
 reciprocal.2 <- function(x) reciprocal(as.numeric(x))
 
 reciprocal(4)

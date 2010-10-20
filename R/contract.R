@@ -1,6 +1,7 @@
 # Adds post-assertions to the base function
-ensure <- function(child.fn, condition, strict=TRUE)
+'%must%' <- function(child.fn, condition)
 {
+  strict <- TRUE
   child <- deparse(substitute(child.fn))
 
   expr <- deparse(substitute(condition))
@@ -10,7 +11,18 @@ ensure <- function(child.fn, condition, strict=TRUE)
   return(.ensure(child, condition, strict, label='ensure.fns'))
 }
 
-'%must%' <- ensure
+ensure <- function(child.fn, condition, strict=TRUE)
+{
+  cat("WARNING: This form is deprecated. Use the %must% operator instead\n")
+  child <- deparse(substitute(child.fn))
+
+  expr <- deparse(substitute(condition))
+  if (length(grep('function', expr)) < 1) 
+    return(.ensure(child, expr, strict, label='ensure.xps'))
+
+  return(.ensure(child, condition, strict, label='ensure.fns'))
+}
+
 
 # Shortcut form for expressions instead of more verbose functions
 # This is the standard way of writing ensures, although the long form is

@@ -1,4 +1,5 @@
-\name{ensure}
+\name{\%must\%}
+\alias{\%must\%}
 \alias{ensure}
 \alias{ensures}
 
@@ -15,8 +16,10 @@
   for a function hierarchy. 
 }
 \usage{
-ensure(child.fn, condition, strict = TRUE)
+child.fn \%must\% condition
 ensures(fn, inherits = TRUE, child = NULL)
+
+ensure(child.fn, condition, strict = TRUE)
 }
 \arguments{
   \item{child.fn}{This is the function for which the assertion is applied. 
@@ -48,7 +51,7 @@ called with the following arguments: the result of the concrete function
 If the condition fails, execution will halt with an error message.
 }
 \value{
-The 'ensure' declaration is used for its side-effects and has no return value.
+The '\%must\%' declaration is used for its side-effects and has no return value.
 
 The 'ensures' function works like 'guards' and displays all registered 
 assertions for a given abstract function.
@@ -67,21 +70,21 @@ assertions for a given abstract function.
 
 # Abbreviated form (recommended)
 # The expression must operate on arguments declared in the concrete function.
-guard(logarithm.1, is.numeric(x))
+logarithm.1 \%when\% is.numeric(x)
 logarithm.1 <- function(x) logarithm(x, exp(1))
 
 # Explicit form (only necessary for special cases)
-guard(logarithm.base, function(x,y) is.numeric(x) && is.numeric(y))
+logarithm.base \%when\% (is.numeric(x) && is.numeric(y))
+logarithm.base \%must\% (! is.nan(result) && ! is.infinite(result))
 logarithm.base <- function(x,y) log(x, base=y)
-ensure(logarithm.base, ! is.nan(result) && ! is.infinite(result))
 
-guard(logarithm.default2, TRUE)
+logarithm.default2 \%when\% TRUE
 logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
 # Uses all arguments in assertion
-guard(f, is.numeric(a) & is.numeric(b) & b > 1)
+f \%when\% (is.numeric(a) & is.numeric(b) & b > 1)
+f \%must\% (result == a + b)
 f <- function(a,b) a + b
-ensure(f, result == a + b)
 
 # View the function variants for this abstract function
 ensures(logarithm)

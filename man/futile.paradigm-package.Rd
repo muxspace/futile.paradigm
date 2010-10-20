@@ -56,19 +56,20 @@ all guards must resolve to TRUE for the function to execute. In addition to a
 function, a default function can be defined by setting the guard expression
 to TRUE.
 
+To use the package, two key operators are introduced to implement guard 
+statements and assertions. Guards are declared by using the '\%when\%'
+operator, which is reminiscent of the Erlang approach to guards.
 By convention the guard is declared before the function definition as this 
 communicates immediately the criteria required to execute this particular 
 implementation of the parent function.  See the examples section for a trivial
 implementation.
 
 In addition to guard statements, this package provides post-assertions 
-reminiscent of Eiffel's design-by-contract approach. Using 'ensure' 
-declarations validates function outputs and fails if they aren't satisfied.
+reminiscent of Eiffel's design-by-contract approach. Using the '\%must\%'
+operator validates function outputs and fails if they aren't satisfied.
 The arguments to a generated assertion are ordered with the result object
 first (named 'result'), then all of the function arguments.
 
-In many ways R is a functional language. Futile.paradigm complements R's 
-functional strengths to make it easier to develop software in this paradigm.
 
 Conventions:
 . Types are named in PascalCase
@@ -91,38 +92,34 @@ Some background on using guards and pattern matching:
   %http://www.erlang.org/doc/reference_manual/functions.html#id2271076
   http://en.wikipedia.org/wiki/Guard_\%28computing\%29
 }
+\note{
+Due to scoping rules with operators, logical expressions need to be 
+wrapped in parentheses.
+}
 \keyword{ package }
 \seealso{
 \code{\link{UseFunction}}, \code{\link{guard}}, \code{\link{ensure}}
 }
 \examples{
-# Optionally define the parent function that calls the dispatcher
-#abs_max <- function(...) UseFunction('abs_max', ...)
-
 # By convention the guard is defined before the concrete function variant
-guard(abs_max.recursive1, is.numeric(a) && length(a) > 1)
-
+abs_max.recursive1 \%when\% (is.numeric(a) && length(a) > 1)
 # This adds a post-assertion to ensure the value is what you expect
-ensure(abs_max.recursive1, result > 0)
-
+abs_max.recursive1 \%must\% (result > 0)
 abs_max.recursive1 <- function(a) abs_max(a[1], abs_max(a[2:length(a)]))
 
-guard(abs_max.recursive2, is.numeric(a) && length(a) == 1)
-ensure(abs_max.recursive2, result == a)
+abs_max.recursive2 \%when\% (is.numeric(a) && length(a) == 1)
+abs_max.recursive2 \%must\% (result == a)
 abs_max.recursive2 <- function(a) a
 
-guard(abs_max.csv, isa(DataObject,a) & hasa(data,a))
+abs_max.csv \%when\% (a \%isa\% DataObject & a \%hasa\% data)
 abs_max.csv <- function(a) abs_max(as.numeric(strsplit(a$data, ',')[[1]]))
 
-# The explicit form allows multiple guard functions
-guard(abs_max.twoArg, c(
-  function(a,b) is.numeric(a),
-  function(a,b) is.numeric(b)) )
-ensure(abs_max.twoArg, result >= a | result >= b)
+abs_max.twoArg \%when\% (is.numeric(a) & is.numeric(b))
+abs_max.twoArg \%must\% (result >= a | result >= b)
 abs_max.twoArg <- function(a, b) max(abs(a), abs(b))
 
 # Using a guard of TRUE acts as a default condition
-guard(abs_max.twoArgDefault, TRUE)
+abs_max.twoArgDefault \%when\% TRUE
 abs_max.twoArgDefault <- function(a,b) abs_max(as.numeric(a), as.numeric(b))
 
 # Define constructor for DataObject
@@ -157,10 +154,10 @@ minimize <- function(x0, algo, max.steps=100)
   new.x
 }
 
-guard(iterate.nr, isa(NewtonRaphson, algo))
+iterate.nr \%when\% (algo \%isa\% NewtonRaphson)
 iterate.nr <- function(x, algo) x - algo$f1(x) / algo$f2(x)
 
-guard(iterate.gd, isa(GradientDescent, algo))
+iterate.gd \%when\% (algo \%isa\% GradientDescent)
 iterate.gd <- function(x, algo) x - algo$step * algo$f1(x)
 
 create.GradientDescent <- function(T, f1, step=0.01) list(f1=f1,step=step)

@@ -6,23 +6,31 @@ paradigm.options <- OptionsManager('paradigm.options')
 
 
 # Adds guards to the base function for functional dispatching
-guard <- function(child.fn, condition, strict=TRUE)
+'%when%' <- function(child.fn, condition)
 {
+  strict <- TRUE
   child <- deparse(substitute(child.fn))
 
   expr <- deparse(substitute(condition))
-  # For debugging
-  #  cat("[From guard]\n")
-  #  cat("Parent: "); print(parent.frame())
-  #  cat("TopEnv: "); print(topenv(parent.frame()))
   if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
     return(.guard(child, expr, strict, label='guard.xps'))
 
   return(.guard(child, condition, strict, label='guard.fns'))
 }
 
-# This is the preferred form
-'%when%' <- guard
+# Deprecated
+guard <- function(child.fn, condition, strict=TRUE)
+{
+  cat("WARNING: This form is deprecated. Use the %when% operator instead\n")
+  child <- deparse(substitute(child.fn))
+
+  expr <- deparse(substitute(condition))
+  if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
+    return(.guard(child, expr, strict, label='guard.xps'))
+
+  return(.guard(child, condition, strict, label='guard.fns'))
+}
+
 
 # Shortcut form for simple pattern matches
 # label := { guard.xps, guard.fns }
@@ -107,12 +115,6 @@ isStrict <- function(child.fn)
   FALSE
 }
 
-isa <- function(type, argument)
-{
-  type <- gsub('[\'"]','',deparse(substitute(type)))
-  type %in% class(argument)
-}
-
 '%isa%' <- function(argument, type)
 {
   type <- gsub('[\'"]','',deparse(substitute(type)))
@@ -120,16 +122,6 @@ isa <- function(type, argument)
 }
 
 # Note this will produce a vector of results
-hasa <- function(property, argument)
-{
-  property <- gsub('[\'"]','',deparse(substitute(property)))
-  property <- gsub(' ','', property, fixed=TRUE)
-  property <- sub('c(','', property, fixed=TRUE)
-  property <- sub(')','', property, fixed=TRUE)
-  props <- strsplit(property, ',', fixed=TRUE)[[1]]
-  props %in% names(argument)
-}
-
 '%hasa%' <- function(argument, property)
 {
   property <- gsub('[\'"]','',deparse(substitute(property)))
@@ -150,17 +142,6 @@ hasa <- function(property, argument)
   all(props %in% names(argument))
 }
 
-
-# If all properties exist
-hasall <- function(property, argument)
-{
-  property <- gsub('[\'"]','',deparse(substitute(property)))
-  property <- gsub(' ','', property, fixed=TRUE)
-  property <- sub('c(','', property, fixed=TRUE)
-  property <- sub(')','', property, fixed=TRUE)
-  props <- strsplit(property, ',', fixed=TRUE)[[1]]
-  all(props %in% names(argument))
-}
 
 .SIMPLE_TYPES <- c('numeric','character','POSIXt','POSIXct')
 .is.simple <- function(x) any(class(x) %in% .SIMPLE_TYPES)
@@ -329,5 +310,36 @@ AbuseMethod <- function(fn.name, type, ..., EXPLICIT=FALSE, ALWAYS=TRUE)
   }
 }
 
+
+# Deprecated
+isa <- function(type, argument)
+{
+  type <- gsub('[\'"]','',deparse(substitute(type)))
+  type %in% class(argument)
+}
+
+# Deprecated
+# Note this will produce a vector of results
+hasa <- function(property, argument)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  props %in% names(argument)
+}
+
+# Deprecated
+# If all properties exist
+hasall <- function(property, argument)
+{
+  property <- gsub('[\'"]','',deparse(substitute(property)))
+  property <- gsub(' ','', property, fixed=TRUE)
+  property <- sub('c(','', property, fixed=TRUE)
+  property <- sub(')','', property, fixed=TRUE)
+  props <- strsplit(property, ',', fixed=TRUE)[[1]]
+  all(props %in% names(argument))
+}
 
 

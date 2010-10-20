@@ -1,21 +1,21 @@
 # Interface for create functions
 # Example
 #   create(my.class, arg1, arg2)
-create <- function(x, ...)
+create <- function(type, ...)
 {
-  type <- deparse(substitute(x))
-  type <- gsub('"','', type)
+  type1 <- deparse(substitute(type))
+  type1 <- gsub('"','', type1)
   err.obj <- NULL
-  tryCatch(is.same <- type == x, error=function(e) err.obj <<- e)
+  tryCatch(is.same <- type1 == type, error=function(e) err.obj <<- e)
 
   # ! is.null(err.obj) => use type (class symbol provided)
   # is.same => use type (string representation of class name)
   # else => use x (dynamically evaluated class name)
-  if (is.null(err.obj) && ! is.same) type <- x
+  if (is.null(err.obj) && ! is.same) type1 <- type
 
   # This is a special construction for create
-  o <- AbuseMethod('create', type, type, ..., EXPLICIT=TRUE)
-  class(o) <- c(type,class(o))
+  o <- AbuseMethod('create', type1, type1, ..., EXPLICIT=TRUE)
+  class(o) <- c(type1,class(o))
   o
 }
 

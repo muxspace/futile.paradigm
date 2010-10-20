@@ -8,12 +8,11 @@ Currently only create is provided, as this is essential for type management
 within futile.paradigm. Others will be added as necessary.
 }
 \usage{
-create(x, ...)
+create(type, ...)
 create.default(type, ...)
 }
 \arguments{
-  \item{x}{ An arbitrary object }
-  \item{type}{ A symbol or character that represents a type }
+  \item{type}{The object type to create as a symbol or character}
   \item{\dots}{ Additional arguments to pass to dispatched functions }
 }
 \details{
@@ -35,15 +34,22 @@ create.default(type, ...)
 \author{ Brian Lee Yung Rowe }
 
 \examples{
-create.Car <- function(x, wheels=4, doors=2) list(wheels=wheels, doors=doors)
-my.car <- create(Car, doors=4)
+create.Car <- function(T, wheels=4, doors=4) list(wheels=wheels, doors=doors)
 
-your.car <- create('Car', wheels=6)
+# This is how you inherit from a type
+create.SportsCar <- function(T, doors=2, ...)
+  create(Car, doors=doors, ...)
 
+my.car <- create(Car, doors=5)
+
+your.car <- create('SportsCar')
+
+# The type can be passed in via a variable as well
 her.class <- 'Car'
 her.car <- create(her.class, wheels=3)
 
-isa(Car, my.car)
+my.car \%isa\% Car
+your.car \%isa\% SportsCar
 }
 \keyword{ programming }
 \keyword{ methods }
