@@ -13,27 +13,119 @@ paradigm.options <- OptionsManager('paradigm.options')
 
   expr <- deparse(substitute(condition))
   if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
-    return(.guard(child, expr, strict, label='guard.xps'))
+  {
+    # TODO: Version 1 is deprecated
+    if (paradigm.options('version') == 1)
+      return(.guard(child, expr, strict, label='guard.xps'))
+
+    # This is version 2
+    return(.when(child, expr))
+  }
 
   return(.guard(child, condition, strict, label='guard.fns'))
 }
 
-# Deprecated
-guard <- function(child.fn, condition, strict=TRUE)
+# Adds guards to the same function variant. This is only for version 2
+'%also%' <- function(child.fn, condition)
 {
-  cat("WARNING: This form is deprecated. Use the %when% operator instead\n")
   child <- deparse(substitute(child.fn))
-
   expr <- deparse(substitute(condition))
-  if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
-    return(.guard(child, expr, strict, label='guard.xps'))
+  return(.also(child, condition))
+}
 
-  return(.guard(child, condition, strict, label='guard.fns'))
+# Adds the function definition to the function
+'%as%' <- function(child.fn, fn.def)
+{
+  child <- deparse(substitute(child.fn))
+  return(.as(child, fn.def))
+}
+
+.setup.parent <- function(parent, where, fn)
+{
+  # Overwrite a final definition (as opposed to appending)
+  if (exists(parent, where) & attr(fn, 'final') == TRUE)
+  {
+    parent.def <- get(parent, where)
+    attributes(fn) <- NULL
+    attr(parent.def,'variant.count') <- 0
+    assign(parent, parent.def, where)
+  }
+  else if (! exists(parent, where))
+  {
+    pattern <- 'function(...) UseFunction(\'%s\',...)'
+    parent.def <- eval(parse(text=sprintf(pattern,parent)))
+    attr(parent.def,'variant.count') <- 0
+    #cat("Adding parent function",parent.def,"to",where,"\n")
+    assign(parent, parent.def, where)
+    #msg <- "Function %s has no visible parent function '%s'"
+    #stop(sprintf(msg, child, parent))
+  }
+}
+
+# New structure is
+# attr(,"variant.count")
+# attr(,"parent.1")$clause.1
+# attr(,"parent.1")$clause.2
+# attr(,"parent.1")$function
+# attr(,"parent.2")$clause.1
+# attr(,"parent.2")$function
+.when <- function(parent, condition)
+{
+  # We use 2 because this is called from within the 'guard' function so the
+  # stack is two down
+  where <- topenv(parent.frame(2))
+  fn <- get(parent, where)
+  .setup.parent(parent, where, fn)
+
+  variant.count <- attr(fn,'variant.count')
+  name <- paste(parent, variant.count+1, collapse=".")
+  gs <- list(clause.1=condition)
+
+  attr(fn, name) <- gs
+  assign(parent, fn, where)
+  invisible()
+}
+
+.also <- function(parent, condition)
+{
+  # We use 2 because this is called from within the 'guard' function so the
+  # stack is two down
+  where <- topenv(parent.frame(2))
+  fn <- get(parent, where)
+  .setup.parent(parent, where, fn)
+
+  variant.count <- attr(fn,'variant.count')
+  name <- paste(parent, variant.count, collapse=".")
+  gs <- attr(fn, name)
+  count <- length(gs)
+  gs[[paste("clause",count+1, collapse=".")]] <- condition
+
+  attr(fn, name) <- gs
+  assign(parent, fn, where)
+  invisible()
+}
+
+.as <- function(parent, fn.def)
+{
+  # We use 2 because this is called from within the 'guard' function so the
+  # stack is two down
+  where <- topenv(parent.frame(2))
+  fn <- get(parent, where)
+  .setup.parent(parent, where, fn)
+
+  variant.count <- attr(fn,'variant.count')
+  name <- paste(parent, variant.count, collapse=".")
+  gs <- attr(fn, name)
+  count <- length(gs)
+  gs[['function']] <- fn.def
+
+  attr(fn, name) <- gs
+  assign(parent, fn, where)
+  invisible()
 }
 
 
-# Shortcut form for simple pattern matches
-# label := { guard.xps, guard.fns }
+# DEPRECATED
 .guard <- function(child, condition, strict, label)
 {
   parent <- sub('\\.[^.]+$','', child)
@@ -99,7 +191,20 @@ guards <- function(fn, inherits=TRUE)
   guards(get(parent, inherits=TRUE), inherits=TRUE)
 }
 
+# Returns a function variant. Useful for debugging
+# debug(variant(some.function.1))
+variant <- function(name.fn)
+{
+  name <- deparse(substitute(name.fn))
+  parts <- strsplit(name, ".", fixed=TRUE)[[1]]
+  parent <- parts[1:(length(parts)-1)]
+  index <- parts[length(parts)]
+  fn <- get(parent)
+  attr(fn, name)$function
+}
+
 # Operates on a child function or function name
+# DEPRECATED
 isStrict <- function(child.fn)
 {
   if (is.function(child.fn)) child <- deparse(substitute(child.fn))
