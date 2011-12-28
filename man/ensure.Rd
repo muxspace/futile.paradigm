@@ -1,6 +1,5 @@
 \name{\%must\%}
 \alias{\%must\%}
-\alias{ensure}
 \alias{ensures}
 
 \title{
@@ -16,19 +15,16 @@
   for a function hierarchy. 
 }
 \usage{
-child.fn \%must\% condition
+fn.ref \%must\% condition
 ensures(fn, inherits = TRUE, child = NULL)
 
-ensure(child.fn, condition, strict = TRUE)
 }
 \arguments{
-  \item{child.fn}{This is the function for which the assertion is applied. 
+  \item{fn.ref}{This is the function for which the assertion is applied. 
   Unlike with 'guard', the function must exist }
   \item{condition}{The conditions for dispatching to this function. This can 
     either be an expression, a function, or vector of functions. See Details
     for more information }
-  \item{strict}{Whether strict matching of arguments should be used. See Details
-    for more information}
   \item{fn}{The function to find assertions for. If this is a child function,
     the parent function will be queried}
   \item{inherits}{If a function is passed that has no assertions, whether to 
@@ -59,32 +55,34 @@ assertions for a given abstract function.
 
 \author{ Brian Lee Yung Rowe }
 
-\seealso{ \code{\link{UseFunction}}, \code{\link{guard}} }
+\seealso{ \code{\link{UseFunction}}, \code{\link{\%when\%}} }
 \examples{
 # Note that these are trivial examples for pedagogical purposes. Due to their
 # trivial nature, most of these examples can be implemented more concisely
 # using built-in R features.
 
-# This is optional except when naming is ambiguous
-#logarithm <- function(...) UseFunction('logarithm', ...)
 
-# Abbreviated form (recommended)
 # The expression must operate on arguments declared in the concrete function.
-logarithm.1 \%when\% is.numeric(x)
-logarithm.1 <- function(x) logarithm(x, exp(1))
+logarithm \%when\% is.numeric(x)
+logarithm \%as\% function(x) logarithm(x, exp(1))
 
 # Explicit form (only necessary for special cases)
-logarithm.base \%when\% (is.numeric(x) && is.numeric(y))
-logarithm.base \%must\% (! is.nan(result) && ! is.infinite(result))
-logarithm.base <- function(x,y) log(x, base=y)
+logarithm \%when\% is.numeric(x)
+logarithm \%also\% is.numeric(y)
+logarithm \%must\% (! is.nan(result) && ! is.infinite(result))
+logarithm \%as\% function(x,y) log(x, base=y)
 
-logarithm.default2 \%when\% TRUE
-logarithm.default2 <- function(x,y) logarithm(as.numeric(x), as.numeric(y))
+logarithm \%when\% TRUE
+logarithm \%as\% function(x,y) logarithm(as.numeric(x), as.numeric(y))
+
+logarithm(5)
 
 # Uses all arguments in assertion
 f \%when\% (is.numeric(a) & is.numeric(b) & b > 1)
 f \%must\% (result == a + b)
-f <- function(a,b) a + b
+f \%as\% function(a,b) a + b
+
+f(2,3)
 
 # View the function variants for this abstract function
 ensures(logarithm)

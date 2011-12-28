@@ -2,27 +2,27 @@ o <- create(Dummy, a=3, c=5)
 
 test.hasa.single <- function()
 {
-  checkTrue(hasa(a, o))
-  checkTrue(hasa(c, o))
-  checkTrue(! hasa(b, o))
+  checkTrue(o %hasa% a)
+  checkTrue(o %hasa% c)
+  checkTrue(! o %hasa% b)
 }
 
 test.hasa.multiple <- function()
 {
-  checkTrue(all(c(TRUE,FALSE) == hasa(c(a,b), o)) )
-  checkTrue(all(c(TRUE,TRUE) == hasa(c(a,c), o)) )
+  checkTrue(all(c(TRUE,FALSE) == o %hasa% c(a,b) ))
+  checkTrue(all(c(TRUE,TRUE) == o %hasa% c(a,c) ))
 }
 
 test.hasall.single <- function()
 {
-  checkTrue(hasall(a, o))
-  checkTrue(hasall(c, o))
-  checkTrue(! hasall(b, o))
+  checkTrue(o %hasall% a)
+  checkTrue(o %hasall% c)
+  checkTrue(! o %hasall% b)
 }
 
 test.hasall.multiple <- function()
 {
-  checkTrue(! hasall(c(a,b), o))
-  checkTrue(hasall(c(a,c), o))
+  checkTrue(! o %hasall% c(a,b))
+  checkTrue(o %hasall% c(a,c))
 }
 

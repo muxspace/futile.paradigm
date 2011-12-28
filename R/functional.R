@@ -6,10 +6,10 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 
 
 # Adds guards to the base function for functional dispatching
-'%when%' <- function(child.fn, condition)
+'%when%' <- function(fn.ref, condition)
 {
   strict <- TRUE
-  child <- deparse(substitute(child.fn))
+  child <- deparse(substitute(fn.ref))
 
   expr <- deparse(substitute(condition))
   if (length(grep('^(c\\()?function', expr, perl=TRUE)) < 1) 
@@ -26,17 +26,17 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 }
 
 # Adds guards to the same function variant. This is only for version 2
-'%also%' <- function(child.fn, condition)
+'%also%' <- function(fn.ref, condition)
 {
-  child <- deparse(substitute(child.fn))
+  child <- deparse(substitute(fn.ref))
   expr <- deparse(substitute(condition))
   return(.also(child, expr))
 }
 
 # Adds the function definition to the function
-'%as%' <- function(child.fn, fn.def)
+'%as%' <- function(fn.ref, fn.def)
 {
-  child <- deparse(substitute(child.fn))
+  child <- deparse(substitute(fn.ref))
   return(.as(child, fn.def))
 }
 
@@ -83,7 +83,7 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
   fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count') + 1
   name <- paste(parent, variant.count, collapse=".")
-  cat("[.when] Adding",name,"to function\n")
+  #cat("[.when] Adding",name,"to function\n")
   gs <- list(guards=c(condition))
 
   attr(fn, name) <- gs
@@ -181,25 +181,25 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 # of its attached children
 # This only works for one level since the deparse/substitute's lazy evaluation
 # messes up the recursion
-guards <- function(fn, inherits=TRUE)
+guards <- function(fn.ref, inherits=TRUE)
 {
-  if (! is.function(fn))
+  if (! is.function(fn.ref))
     stop("Guard introspection can only be applied to functions")
 
   if (paradigm.options('version') == 1)
   {
-    gfs <- attr(fn, 'guard.fns', exact=TRUE)
-    gxs <- attr(fn, 'guard.xps', exact=TRUE)
+    gfs <- attr(fn.ref, 'guard.fns', exact=TRUE)
+    gxs <- attr(fn.ref, 'guard.xps', exact=TRUE)
     gs <- list(functions=gfs, expressions=gxs)
     if (! is.null(gfs) || ! is.null(gxs)) return(gs)
     if (! inherits) return(gs)
 
-    parent <- sub('\\.[^.]+$','', deparse(substitute(fn)))
+    parent <- sub('\\.[^.]+$','', deparse(substitute(fn.ref)))
     guards(get(parent, inherits=TRUE), inherits=TRUE)
   }
   else
   {
-    attributes(fn)
+    attributes(fn.ref)
   }
 }
 
@@ -217,7 +217,7 @@ variant <- function(name.fn)
 
 # Operates on a child function or function name
 # DEPRECATED
-isStrict <- function(child.fn)
+.isStrict <- function(child.fn)
 {
   if (is.function(child.fn)) child <- deparse(substitute(child.fn))
   else child <- child.fn
@@ -363,8 +363,8 @@ UseFunction <- function(fn.name, ...)
   for (f in names(defs))
   {
     if (class(defs[[f]]) != 'list') next
-    cat("[.applyVariant]",class(defs[[f]]),"\n")
-    print(defs[[f]])
+    #cat("[.applyVariant]",class(defs[[f]]),"\n")
+    #print(defs[[f]])
 
     f.exec <- defs[[f]][['definition']]
     # Basic validation
@@ -392,7 +392,7 @@ UseFunction <- function(fn.name, ...)
       # instead so the logic becomes a disjunction
       if (! valid) break
     }
-    if (valid) return(f)
+    if (valid) return(f.exec)
   }
   NULL
 }
@@ -412,7 +412,7 @@ UseFunction <- function(fn.name, ...)
     # If strict, match exactly the function arguments with the arguments
     # passed in. This is the default behavior.
     non.empty <- names(args)[nchar(names(args)) > 0]
-    if (length(non.empty) > 0 && isStrict(f) && 
+    if (length(non.empty) > 0 && .isStrict(f) && 
         length(setdiff(non.empty, names(formals(f)))) > 0 )
       next
 
@@ -475,36 +475,5 @@ AbuseMethod <- function(fn.name, type, ..., EXPLICIT=FALSE, ALWAYS=TRUE)
   }
 }
 
-
-# Deprecated
-isa <- function(type, argument)
-{
-  type <- gsub('[\'"]','',deparse(substitute(type)))
-  type %in% class(argument)
-}
-
-# Deprecated
-# Note this will produce a vector of results
-hasa <- function(property, argument)
-{
-  property <- gsub('[\'"]','',deparse(substitute(property)))
-  property <- gsub(' ','', property, fixed=TRUE)
-  property <- sub('c(','', property, fixed=TRUE)
-  property <- sub(')','', property, fixed=TRUE)
-  props <- strsplit(property, ',', fixed=TRUE)[[1]]
-  props %in% names(argument)
-}
-
-# Deprecated
-# If all properties exist
-hasall <- function(property, argument)
-{
-  property <- gsub('[\'"]','',deparse(substitute(property)))
-  property <- gsub(' ','', property, fixed=TRUE)
-  property <- sub('c(','', property, fixed=TRUE)
-  property <- sub(')','', property, fixed=TRUE)
-  props <- strsplit(property, ',', fixed=TRUE)[[1]]
-  all(props %in% names(argument))
-}
 
 

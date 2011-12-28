@@ -1,8 +1,8 @@
 # Adds post-assertions to the base function
-'%must%' <- function(child.fn, condition)
+'%must%' <- function(fn.ref, condition)
 {
   strict <- TRUE
-  child <- deparse(substitute(child.fn))
+  child <- deparse(substitute(fn.ref))
 
   expr <- deparse(substitute(condition))
   if (length(grep('function', expr)) < 1) 

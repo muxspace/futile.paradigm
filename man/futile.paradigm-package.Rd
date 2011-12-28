@@ -98,29 +98,30 @@ wrapped in parentheses.
 }
 \keyword{ package }
 \seealso{
-\code{\link{UseFunction}}, \code{\link{guard}}, \code{\link{ensure}}
+\code{\link{UseFunction}}, \code{\link{\%when\%}}, \code{\link{\%must\%}}
 }
 \examples{
-# By convention the guard is defined before the concrete function variant
-abs_max.recursive1 \%when\% (is.numeric(a) && length(a) > 1)
+# The guard must be defined before the concrete function variant
+abs_max \%when\% is.numeric(a)
+abs_max \%also\% (length(a) > 1)
 # This adds a post-assertion to ensure the value is what you expect
-abs_max.recursive1 \%must\% (result > 0)
-abs_max.recursive1 <- function(a) abs_max(a[1], abs_max(a[2:length(a)]))
+abs_max \%must\% (result > 0)
+abs_max \%as\% function(a) abs_max(a[1], abs_max(a[2:length(a)]))
 
-abs_max.recursive2 \%when\% (is.numeric(a) && length(a) == 1)
-abs_max.recursive2 \%must\% (result == a)
-abs_max.recursive2 <- function(a) a
+abs_max \%when\% (is.numeric(a) && length(a) == 1)
+abs_max \%must\% (result == a)
+abs_max \%as\% function(a) a
 
-abs_max.csv \%when\% (a \%isa\% DataObject & a \%hasa\% data)
-abs_max.csv <- function(a) abs_max(as.numeric(strsplit(a$data, ',')[[1]]))
+abs_max \%when\% (a \%isa\% DataObject & a \%hasa\% data)
+abs_max \%as\% function(a) abs_max(as.numeric(strsplit(a$data, ',')[[1]]))
 
-abs_max.twoArg \%when\% (is.numeric(a) & is.numeric(b))
-abs_max.twoArg \%must\% (result >= a | result >= b)
-abs_max.twoArg <- function(a, b) max(abs(a), abs(b))
+abs_max \%when\% (is.numeric(a) & is.numeric(b))
+abs_max \%must\% (result >= a | result >= b)
+abs_max \%as\% function(a, b) max(abs(a), abs(b))
 
 # Using a guard of TRUE acts as a default condition
-abs_max.twoArgDefault \%when\% TRUE
-abs_max.twoArgDefault <- function(a,b) abs_max(as.numeric(a), as.numeric(b))
+abs_max \%when\% TRUE
+abs_max \%as\% function(a,b) abs_max(as.numeric(a), as.numeric(b))
 
 # Define constructor for DataObject
 create.DataObject <- function(T, data, name=NA) list(name=name, data=data)
@@ -154,11 +155,11 @@ minimize <- function(x0, algo, max.steps=100)
   new.x
 }
 
-iterate.nr \%when\% (algo \%isa\% NewtonRaphson)
-iterate.nr <- function(x, algo) x - algo$f1(x) / algo$f2(x)
+iterate \%when\% (algo \%isa\% NewtonRaphson)
+iterate \%as\% function(x, algo) x - algo$f1(x) / algo$f2(x)
 
-iterate.gd \%when\% (algo \%isa\% GradientDescent)
-iterate.gd <- function(x, algo) x - algo$step * algo$f1(x)
+iterate \%when\% (algo \%isa\% GradientDescent)
+iterate \%as\% function(x, algo) x - algo$step * algo$f1(x)
 
 create.GradientDescent <- function(T, f1, step=0.01) list(f1=f1,step=step)
 

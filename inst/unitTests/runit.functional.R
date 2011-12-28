@@ -1,40 +1,34 @@
-paradigm.options(version=1)
-
 # For some reason these variables have to be declared explicitly and globally, 
 # otherwise the scoping within RUnit breaks the tests.
 absdiff <<- function(...) UseFunction('absdiff', ...)
 
-guard(absdiff.1, c(
-  function(a,b) is.numeric(a) && is.numeric(b),
-  function(a,b) a > b
-))
-absdiff.1 <<- function(a, b) a - b
+absdiff %when% (is.numeric(a) && is.numeric(b))
+absdiff %also% (a > b)
+absdiff %as% function(a, b) a - b
 
-guard(absdiff.2, c(
-  function(a,b) is.numeric(a) && is.numeric(b),
-  function(a,b) a < b
-))
-absdiff.2 <- function(a, b) b - a
+absdiff %when% (is.numeric(a) && is.numeric(b))
+absdiff %also% (a < b)
+absdiff %as% function(a, b) b - a
 
-guard(absdiff.21, ! is.numeric(a) || ! is.numeric(b))
-absdiff.21 <<- function(a, b) absdiff(as.double(a), as.double(b))
+absdiff %when% (! is.numeric(a) || ! is.numeric(b))
+absdiff %as% function(a, b) absdiff(as.double(a), as.double(b))
 
-# This converts to integers. This will be called if c and 
+# This converts o integers. This will be called if c and 
 # optionally d is named
-guard(absdiff.int, TRUE)
-absdiff.int <<- function(c, d) absdiff(as.integer(c), as.integer(d))
+absdiff %when% TRUE
+absdiff %as% function(c, d) absdiff(as.integer(c), as.integer(d))
 
-# This uses log values. Note that this will only be executed if
+# This uses log vlues. Note that this will only be executed if
 # l is explicitly named (and all preceding 2 argument functions
 # are strict).
-guard(absdiff.log, TRUE)
-absdiff.log <<- function(a, l) absdiff(log(a), log(l))
+absdiff %when% TRUE
+absdiff %as% function(a, l) absdiff(log(a), log(l))
 
-guard(absdiff.3, a > 5)
-absdiff.3 <<- function(a) a * 2
+absdiff %when% (a > 5)
+absdiff %as% function(a) a * 2
 
-guard(absdiff.4, TRUE)
-absdiff.4 <<- function(a) a + 1
+absdiff %when% TRUE
+absdiff %as% function(a) a + 1
 
 cat("Objects after definitions:\n")
 cat(ls())
@@ -109,25 +103,25 @@ test.absdiff.log <- function()
 ## DEFINITIONS FOR ADVANCED GUARDS (INCOMPLETE)
 interpolate <<- function(...) UseFunction('interpolate',...)
 
-guard(interpolate, isa('linear', cfg))
-interpolate <<- function(cfg, a,b) { }
+interpolate %when% (cfg %isa% 'linear')
+interpolate %as% function(cfg, a,b) { }
 
 
 ## TESTS FOR ENSURE
 logarithm <<- function(...) UseFunction('logarithm',...)
 
-guard(logarithm.1, is.numeric(x))
-ensure(logarithm.1, ! is.nan(result) && ! is.infinite(result))
-logarithm.1 <<- function(x) logarithm(x, exp(1))
+logarithm %when% is.numeric(x)
+logarithm %must% (! is.nan(result) && ! is.infinite(result))
+logarithm %as% function(x) logarithm(x, exp(1))
 
-guard(logarithm.default1, TRUE)
-logarithm.default1 <<- function(x) logarithm(as.numeric(x))
+logarithm %when% TRUE
+logarithm %as% function(x) logarithm(as.numeric(x))
 
-guard(logarithm.base, function(x,y) is.numeric(x) && is.numeric(y))
-logarithm.base <<- function(x,y) log(x, base=y)
+logarithm %when% (is.numeric(x) && is.numeric(y))
+logarithm %as% function(x,y) log(x, base=y)
 
-guard(logarithm.default2, TRUE)
-logarithm.default2 <<- function(x,y) logarithm(as.numeric(x), as.numeric(y))
+logarithm %when% TRUE
+logarithm %as% function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
 
 test.logarithm.int <<- function()
