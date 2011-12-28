@@ -6,23 +6,35 @@
 
   expr <- deparse(substitute(condition))
   if (length(grep('function', expr)) < 1) 
-    return(.ensure(child, expr, strict, label='ensure.xps'))
+  {
+    # TODO: Version 1 is deprecated
+    if (paradigm.options('version') == 1)
+      return(.ensure(child, expr, strict, label='ensure.xps'))
+
+    # This is version 2
+    return(.must(child, expr))
+  }
 
   return(.ensure(child, condition, strict, label='ensure.fns'))
 }
 
-ensure <- function(child.fn, condition, strict=TRUE)
+.must <- function(parent, condition)
 {
-  cat("WARNING: This form is deprecated. Use the %must% operator instead\n")
-  child <- deparse(substitute(child.fn))
+  # We use 2 because this is called from within the 'guard' function so the
+  # stack is two down
+  where <- topenv(parent.frame(2))
+  .setup.parent(parent, where)
 
-  expr <- deparse(substitute(condition))
-  if (length(grep('function', expr)) < 1) 
-    return(.ensure(child, expr, strict, label='ensure.xps'))
+  fn <- get(parent, where)
+  variant.count <- attr(fn,'variant.count')
+  name <- paste(parent, variant.count, collapse=".")
+  gs <- attr(fn, name)
+  gs$ensures <- c(gs$ensures, condition)
 
-  return(.ensure(child, condition, strict, label='ensure.fns'))
+  attr(fn, name) <- gs
+  assign(parent, fn, where)
+  invisible()
 }
-
 
 # Shortcut form for expressions instead of more verbose functions
 # This is the standard way of writing ensures, although the long form is

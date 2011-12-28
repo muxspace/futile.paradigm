@@ -43,13 +43,15 @@ UseFunction(fn.name, ...)
 # Optional
 #reciprocal <- function(...) UseFunction('reciprocal', ...)
 
-reciprocal.1 \%when\% (is.numeric(x) && x != 0)
-reciprocal.1 \%must\% (sign(result) == sign(x))
-reciprocal.1 <- function(x) 1 / x
+reciprocal \%when\% is.numeric(x)
+reciprocal \%also\% (x != 0)
+reciprocal \%must\% (sign(result) == sign(x))
+reciprocal \%as\% function(x) 1 / x
 
-reciprocal.2 \%when\% is.character(x)
-reciprocal.2 <- function(x) reciprocal(as.numeric(x))
+reciprocal \%when\% is.character(x)
+reciprocal \%as\% function(x) reciprocal(as.numeric(x))
 
+print(reciprocal)
 reciprocal(4)
 
 }

@@ -2,7 +2,7 @@
 #configLogger(threshold=DEBUG)
 #lg <- getLogger()
 # Probably don't need this any more
-paradigm.options <- OptionsManager('paradigm.options')
+paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 
 
 # Adds guards to the base function for functional dispatching
@@ -30,7 +30,7 @@ paradigm.options <- OptionsManager('paradigm.options')
 {
   child <- deparse(substitute(child.fn))
   expr <- deparse(substitute(condition))
-  return(.also(child, condition))
+  return(.also(child, expr))
 }
 
 # Adds the function definition to the function
@@ -40,15 +40,19 @@ paradigm.options <- OptionsManager('paradigm.options')
   return(.as(child, fn.def))
 }
 
-.setup.parent <- function(parent, where, fn)
+.setup.parent <- function(parent, where)
 {
   # Overwrite a final definition (as opposed to appending)
-  if (exists(parent, where) & attr(fn, 'final') == TRUE)
+  if (exists(parent, where))
   {
     parent.def <- get(parent, where)
-    attributes(fn) <- NULL
-    attr(parent.def,'variant.count') <- 0
-    assign(parent, parent.def, where)
+    is.final <- attr(parent.def, 'final')
+    if (!is.null(is.final) && is.final == TRUE)
+    {
+      attributes(fn) <- NULL
+      attr(parent.def,'variant.count') <- 0
+      assign(parent, parent.def, where)
+    }
   }
   else if (! exists(parent, where))
   {
@@ -64,24 +68,26 @@ paradigm.options <- OptionsManager('paradigm.options')
 
 # New structure is
 # attr(,"variant.count")
-# attr(,"parent.1")$clause.1
-# attr(,"parent.1")$clause.2
-# attr(,"parent.1")$function
-# attr(,"parent.2")$clause.1
-# attr(,"parent.2")$function
+# attr(,"parent.1")$guards
+# attr(,"parent.1")$ensures
+# attr(,"parent.1")$definition
+# attr(,"parent.2")$guards
+# attr(,"parent.2")$definition
 .when <- function(parent, condition)
 {
   # We use 2 because this is called from within the 'guard' function so the
   # stack is two down
   where <- topenv(parent.frame(2))
-  fn <- get(parent, where)
-  .setup.parent(parent, where, fn)
+  .setup.parent(parent, where)
 
-  variant.count <- attr(fn,'variant.count')
-  name <- paste(parent, variant.count+1, collapse=".")
-  gs <- list(clause.1=condition)
+  fn <- get(parent, where)
+  variant.count <- attr(fn,'variant.count') + 1
+  name <- paste(parent, variant.count, collapse=".")
+  cat("[.when] Adding",name,"to function\n")
+  gs <- list(guards=c(condition))
 
   attr(fn, name) <- gs
+  attr(fn, 'variant.count') <- variant.count
   assign(parent, fn, where)
   invisible()
 }
@@ -91,14 +97,13 @@ paradigm.options <- OptionsManager('paradigm.options')
   # We use 2 because this is called from within the 'guard' function so the
   # stack is two down
   where <- topenv(parent.frame(2))
-  fn <- get(parent, where)
-  .setup.parent(parent, where, fn)
+  .setup.parent(parent, where)
 
+  fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count')
   name <- paste(parent, variant.count, collapse=".")
   gs <- attr(fn, name)
-  count <- length(gs)
-  gs[[paste("clause",count+1, collapse=".")]] <- condition
+  gs$guards <- c(gs$guards,condition)
 
   attr(fn, name) <- gs
   assign(parent, fn, where)
@@ -110,14 +115,14 @@ paradigm.options <- OptionsManager('paradigm.options')
   # We use 2 because this is called from within the 'guard' function so the
   # stack is two down
   where <- topenv(parent.frame(2))
-  fn <- get(parent, where)
-  .setup.parent(parent, where, fn)
+  .setup.parent(parent, where)
 
+  fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count')
   name <- paste(parent, variant.count, collapse=".")
   gs <- attr(fn, name)
   count <- length(gs)
-  gs[['function']] <- fn.def
+  gs$definition <- fn.def
 
   attr(fn, name) <- gs
   assign(parent, fn, where)
@@ -181,14 +186,21 @@ guards <- function(fn, inherits=TRUE)
   if (! is.function(fn))
     stop("Guard introspection can only be applied to functions")
 
-  gfs <- attr(fn, 'guard.fns', exact=TRUE)
-  gxs <- attr(fn, 'guard.xps', exact=TRUE)
-  gs <- list(functions=gfs, expressions=gxs)
-  if (! is.null(gfs) || ! is.null(gxs)) return(gs)
-  if (! inherits) return(gs)
+  if (paradigm.options('version') == 1)
+  {
+    gfs <- attr(fn, 'guard.fns', exact=TRUE)
+    gxs <- attr(fn, 'guard.xps', exact=TRUE)
+    gs <- list(functions=gfs, expressions=gxs)
+    if (! is.null(gfs) || ! is.null(gxs)) return(gs)
+    if (! inherits) return(gs)
 
-  parent <- sub('\\.[^.]+$','', deparse(substitute(fn)))
-  guards(get(parent, inherits=TRUE), inherits=TRUE)
+    parent <- sub('\\.[^.]+$','', deparse(substitute(fn)))
+    guards(get(parent, inherits=TRUE), inherits=TRUE)
+  }
+  else
+  {
+    attributes(fn)
+  }
 }
 
 # Returns a function variant. Useful for debugging
@@ -200,7 +212,7 @@ variant <- function(name.fn)
   parent <- parts[1:(length(parts)-1)]
   index <- parts[length(parts)]
   fn <- get(parent)
-  attr(fn, name)$function
+  attr(fn, name)$definition
 }
 
 # Operates on a child function or function name
@@ -269,12 +281,20 @@ UseFunction <- function(fn.name, ...)
   fn <- get(fn.name)
   gs <- guards(fn, inherits=FALSE)
   if (is.null(gs)) stop("Incorrect guard output. Please report to maintainer.")
-  if (is.null(gs$functions) && is.null(gs$expressions))
-    stop("Function must have guards for functional dispatching")
+  # TODO: Version 1 is deprecated
+  if (paradigm.options('version') == 1)
+  {
+    if (is.null(gs$functions) && is.null(gs$expressions))
+      stop("Function must have guards for functional dispatching")
 
-  matched.fn <- .applyGuard(gs$functions, .validateGuardFunction, ...)
-  if (is.null(matched.fn))
-    matched.fn <- .applyGuard(gs$expressions, .validateGuardExpression, ...)
+    matched.fn <- .applyGuard(gs$functions, .validateGuardFunction, ...)
+    if (is.null(matched.fn))
+      matched.fn <- .applyGuard(gs$expressions, .validateGuardExpression, ...)
+  }
+  else
+  {
+    matched.fn <- .applyVariant(gs, .validateGuardExpression, ...)
+  }
   if (is.null(matched.fn))
   {
     args <- sapply(list(...), .as.simple)
@@ -319,9 +339,9 @@ UseFunction <- function(fn.name, ...)
 }
 
 .GUARD_EXPRESSION <- "%s <- function(%s) { %s }"
-.validateGuardExpression <- function(g,f, ...)
+.validateGuardExpression <- function(g,f.exec, ...)
 {
-  f.exec <- get(f)
+  f <- runif(1)
   fn.handle <- paste('.guard',f,sep='_')
   my.args <- paste(names(formals(f.exec)), collapse=',')
   xps <- parse(text=sprintf(.GUARD_EXPRESSION, fn.handle,my.args, g))
@@ -336,6 +356,46 @@ UseFunction <- function(fn.name, ...)
     #required <- sapply(formals(f.exec), function(x) x == '')
     #min.args <- sum(ifelse(required,1,0))
     #if (length(args) < min.args) next
+
+.applyVariant <- function(defs, validator, ...)
+{
+  args <- list(...)
+  for (f in names(defs))
+  {
+    if (class(defs[[f]]) != 'list') next
+    cat("[.applyVariant]",class(defs[[f]]),"\n")
+    print(defs[[f]])
+
+    f.exec <- defs[[f]][['definition']]
+    # Basic validation
+    if (is.null(f.exec)) next
+    if (length(formals(f.exec)) != length(args)) next
+
+    # Matched named arguments
+    non.empty <- names(args)[nchar(names(args)) > 0]
+    if (length(non.empty) > 0 &&
+        length(setdiff(non.empty, names(formals(f)))) > 0 ) next
+
+    valid <- TRUE
+    for (g in defs[[f]][['guards']])
+    {
+      this.valid <- validator(g,f.exec, ...)
+      if (is.null(this.valid))
+      {
+        msg <- "Skipping invalid guard '%s' for function '%s'"
+        cat(sprintf(msg, g, f))
+        next
+      }
+
+      valid <- valid && this.valid
+      # NOTE: If later on we want guard sequences instead, test for valid
+      # instead so the logic becomes a disjunction
+      if (! valid) break
+    }
+    if (valid) return(f)
+  }
+  NULL
+}
 
 .applyGuard <- function(guards, validator, ...)
 {
@@ -359,7 +419,7 @@ UseFunction <- function(fn.name, ...)
     valid <- TRUE
     for (g in guards[[f]])
     {
-      this.valid <- validator(g,f, ...)
+      this.valid <- validator(g,f.exec, ...)
       if (is.null(this.valid))
       {
         msg <- "Skipping invalid guard '%s' for function '%s'"

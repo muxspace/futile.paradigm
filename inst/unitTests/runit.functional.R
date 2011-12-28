@@ -1,3 +1,5 @@
+paradigm.options(version=1)
+
 # For some reason these variables have to be declared explicitly and globally, 
 # otherwise the scoping within RUnit breaks the tests.
 absdiff <<- function(...) UseFunction('absdiff', ...)
