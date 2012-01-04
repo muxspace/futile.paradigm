@@ -40,6 +40,13 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
   return(.as(child, fn.def))
 }
 
+'%default%' <- function(fn.ref, fn.def)
+{
+  child <- deparse(substitute(fn.ref))
+  return(.default(child, fn.def))
+}
+
+
 .setup.parent <- function(parent, where)
 {
   # Overwrite a final definition (as opposed to appending)
@@ -82,7 +89,7 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 
   fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count') + 1
-  name <- paste(parent, variant.count, collapse=".")
+  name <- paste(parent, variant.count, sep=".")
   #cat("[.when] Adding",name,"to function\n")
   gs <- list(guards=c(condition))
 
@@ -101,7 +108,7 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 
   fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count')
-  name <- paste(parent, variant.count, collapse=".")
+  name <- paste(parent, variant.count, sep=".")
   gs <- attr(fn, name)
   gs$guards <- c(gs$guards,condition)
 
@@ -119,12 +126,25 @@ paradigm.options <- OptionsManager('paradigm.options', list(version=2))
 
   fn <- get(parent, where)
   variant.count <- attr(fn,'variant.count')
-  name <- paste(parent, variant.count, collapse=".")
+  name <- paste(parent, variant.count, sep=".")
   gs <- attr(fn, name)
   count <- length(gs)
   gs$definition <- fn.def
 
   attr(fn, name) <- gs
+  assign(parent, fn, where)
+  invisible()
+}
+
+.default <- function(parent, fn.def)
+{
+  # We use 2 because this is called from within the 'guard' function so the
+  # stack is two down
+  where <- topenv(parent.frame(2))
+  .setup.parent(parent, where)
+
+  fn <- get(parent, where)
+  attr(fn, 'default') <- fn.def
   assign(parent, fn, where)
   invisible()
 }
@@ -204,15 +224,32 @@ guards <- function(fn.ref, inherits=TRUE)
 }
 
 # Returns a function variant. Useful for debugging
+# Do not enclose the name in quotes or this will fail
 # debug(variant(some.function.1))
 variant <- function(name.fn)
 {
   name <- deparse(substitute(name.fn))
   parts <- strsplit(name, ".", fixed=TRUE)[[1]]
   parent <- parts[1:(length(parts)-1)]
-  index <- parts[length(parts)]
+  #index <- parts[length(parts)]
+
+  where <- topenv(parent.frame(2))
+  .setup.parent(parent, where)
   fn <- get(parent)
   attr(fn, name)$definition
+}
+
+rm.variant <- function(name.fn)
+{
+  name <- deparse(substitute(name.fn))
+  parts <- strsplit(name, ".", fixed=TRUE)[[1]]
+  parent <- parts[1:(length(parts)-1)]
+
+  where <- topenv(parent.frame(2))
+  .setup.parent(parent, where)
+  fn <- get(parent)
+  attr(fn, name) <- NULL
+  assign(parent, fn, where)
 }
 
 # Operates on a child function or function name
@@ -300,10 +337,17 @@ UseFunction <- function(fn.name, ...)
   }
   if (is.null(matched.fn))
   {
-    args <- sapply(list(...), .as.simple)
-    arg.names <- paste(args, collapse=', ')
-    arg.length <- length(args)
-    stop(sprintf(.ERR_USE_FUNCTION, fn.name, arg.length, arg.names))
+    if (! is.null(attr(fn, 'default')))
+    {
+      matched.fn <- attr(fn, 'default')
+    }
+    else
+    {
+      args <- sapply(list(...), .as.simple)
+      arg.names <- paste(args, collapse=', ')
+      arg.length <- length(args)
+      stop(sprintf(.ERR_USE_FUNCTION, fn.name, arg.length, arg.names))
+    }
   }
 
   #cat("[UseFunction] Calling matched function\n")

@@ -2,11 +2,13 @@
 \alias{\%when\%}
 \alias{\%also\%}
 \alias{\%as\%}
+\alias{\%default\%}
 \alias{\%isa\%}
 \alias{\%hasa\%}
 \alias{\%hasall\%}
 \alias{guards}
 \alias{variant}
+\alias{rm.variant}
 
 \title{
   Add guards to a function to define the conditions when a child function will
@@ -21,6 +23,10 @@
   The '\%also\%' operator specifies additional clauses that must be met to
   execute the given function variant. It is provided as a syntactic 
   convenience to shorten long guards.
+
+  '\%as\%' is used to assign the function variant definition to the function
+
+  '\%default\%' is used to specify a fallback if necessary
 
   The '\%isa\%' operator performs type checking. 
 
@@ -109,6 +115,14 @@ defined in a vector. These details are important to understand as default
 functions defined too early will be greedy and no other criteria will be 
 evaluated. 
 
+Binding an actual function definition to this particular guard sequence is done
+by using the \%as\% operator. Each variant needs at minimum a \%when\% statement
+and an \%as\% statement to succesfully bind a new variant to the given function.
+
+In addition to variants with guards, the \%default\% operator can be used to
+specify a default function that is used if no function variants match when 
+calling the function.
+
 Another important consideration is that using the ellipsis argument is not 
 supported in futile.paradigm. This is by design as the functional programming
 approach intentionally makes function arguments explicit, such that the
@@ -185,9 +199,12 @@ logarithm \%as\% function(x,y) log(x, base=y)
 logarithm \%when\% TRUE
 logarithm \%as\% function(x,y) logarithm(as.numeric(x), as.numeric(y))
 
+logarithm \%default\% function(...) cat("This is the default function\n")
+
 logarithm(100,10)
 logarithm(5)
 logarithm("5")
+logarithm(6,7,8)
 
 # View the function variants for this abstract function
 guards(logarithm)
