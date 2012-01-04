@@ -278,7 +278,9 @@ variant <- function(name.fn)
 UseFunction <- function(fn.name, ...)
 {
   result <- NULL
+  #cat("[UseFunction] Getting function",fn.name,"\n")
   fn <- get(fn.name)
+  #cat("[UseFunction] Getting guards for",fn.name,"\n")
   gs <- guards(fn, inherits=FALSE)
   if (is.null(gs)) stop("Incorrect guard output. Please report to maintainer.")
   # TODO: Version 1 is deprecated
@@ -293,6 +295,7 @@ UseFunction <- function(fn.name, ...)
   }
   else
   {
+    #cat("[UseFunction] Looking for matching variant for",fn.name,"\n")
     matched.fn <- .applyVariant(gs, .validateGuardExpression, ...)
   }
   if (is.null(matched.fn))
@@ -303,6 +306,9 @@ UseFunction <- function(fn.name, ...)
     stop(sprintf(.ERR_USE_FUNCTION, fn.name, arg.length, arg.names))
   }
 
+  #cat("[UseFunction] Calling matched function\n")
+  #print(matched.fn)
+  #cat("\n")
   result <- do.call(matched.fn, list(...))
 
   es <- ensures(fn, inherits=FALSE, child=matched.fn)
@@ -362,24 +368,31 @@ UseFunction <- function(fn.name, ...)
   args <- list(...)
   for (f in names(defs))
   {
+    #cat("[.applyVariant] Checking variant",f,"\n")
     if (class(defs[[f]]) != 'list') next
-    #cat("[.applyVariant]",class(defs[[f]]),"\n")
-    #print(defs[[f]])
+    #cat("[.applyVariant] Elements:\n")
+    print(defs[[f]])
 
+    #cat("[.applyVariant] Getting function reference",f,"\n")
     f.exec <- defs[[f]][['definition']]
     # Basic validation
     if (is.null(f.exec)) next
     if (length(formals(f.exec)) != length(args)) next
 
     # Matched named arguments
+    #cat("[.applyVariant] Getting arguments for",f,"\n")
     non.empty <- names(args)[nchar(names(args)) > 0]
+    #cat("[.applyVariant] Matching arguments for",f,"\n")
     if (length(non.empty) > 0 &&
-        length(setdiff(non.empty, names(formals(f)))) > 0 ) next
+        length(setdiff(non.empty, names(formals(f.exec)))) > 0 ) next
 
     valid <- TRUE
+    #cat("[.applyVariant] Checking guards for",f,"\n")
     for (g in defs[[f]][['guards']])
     {
+      #cat("[.applyVariant] Checking guard",g,"\n")
       this.valid <- validator(g,f.exec, ...)
+      #cat("[.applyVariant] Got result",this.valid,"\n")
       if (is.null(this.valid))
       {
         msg <- "Skipping invalid guard '%s' for function '%s'"
