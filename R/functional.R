@@ -371,7 +371,7 @@ UseFunction <- function(fn.name, ...)
     #cat("[.applyVariant] Checking variant",f,"\n")
     if (class(defs[[f]]) != 'list') next
     #cat("[.applyVariant] Elements:\n")
-    print(defs[[f]])
+    #print(defs[[f]])
 
     #cat("[.applyVariant] Getting function reference",f,"\n")
     f.exec <- defs[[f]][['definition']]
