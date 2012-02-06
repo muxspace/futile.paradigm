@@ -225,7 +225,7 @@ guards <- function(fn.ref, inherits=TRUE)
 
 # Returns a function variant. Useful for debugging
 # Do not enclose the name in quotes or this will fail
-# debug(variant(some.function.1))
+# debug(variant(some_function.1))
 variant <- function(name.fn)
 {
   name <- deparse(substitute(name.fn))

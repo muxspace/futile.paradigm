@@ -3,7 +3,7 @@ Type: Package
 Title: A framework for working in a functional programming paradigm in R
 Version: {version}
 Date: {date}
-Depends: futile.options
+Depends: futile.options, RUnit
 Author: Brian Lee Yung Rowe
 Maintainer: Brian Lee Yung Rowe <r@nurometic.com>
 Description: Provides dispatching implementations suitable for functional programming paradigms. The framework provides a mechanism for attaching guards to functions similar to Erlang, while also providing the safety of assertions reminiscent of Eiffel.
